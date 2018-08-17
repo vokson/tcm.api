@@ -21,7 +21,9 @@ class ApiCheckRole
         ];
 
         $admin = [
-            "api/test_admin"
+            "api/test_admin",
+            "api/settings/get",
+            "api/settings/set",
         ];
 
         $this->permissions = [

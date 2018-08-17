@@ -6,11 +6,10 @@ use App\ApiUser;
 use Illuminate\Http\Request;
 use DateTime;
 use App\Http\Controllers\FeedbackController As Feedback;
+use App\Http\Controllers\SettingsController As Settings;
 
 class ApiAuthController extends Controller
 {
-    private static $tokenLifeTime = 10;
-
     public function login(Request $request)
     {
         $email = $request->input('email');
@@ -45,7 +44,7 @@ class ApiAuthController extends Controller
         if ($user && $user->active == true && $token != "") {
 
             $interval = strtotime('now') - strtotime($user->updated_at);
-            if ($interval > self::$tokenLifeTime) return Feedback::getFeedback(102);
+            if ($interval > Settings::take('TOKEN_LIFE_TIME')) return Feedback::getFeedback(102);
 
             return Feedback::getFeedback(0, [
                 'access_token' => $user->access_token,
@@ -67,7 +66,7 @@ class ApiAuthController extends Controller
         if ($user && $token != "") {
 
             $interval = strtotime('now') - strtotime($user->updated_at);
-            if ($interval > self::$tokenLifeTime) return Feedback::getFeedback(102);
+            if ($interval > Settings::take('TOKEN_LIFE_TIME')) return Feedback::getFeedback(102);
 
             return Feedback::getFeedback(0);
         }

@@ -5,10 +5,15 @@ namespace App\Http\Controllers;
 class FeedbackController extends Controller
 {
     private static $errors = [
+        // Authentication 1xx
         101 => 'Authentication failed. Incorrect login\password',
         102 => 'Token is expired',
         103 => 'Invalid token',
-        104 => 'Permission denied'
+        104 => 'Permission denied',
+        // Admin
+        201 => 'Wrong setting name',
+        202 => 'Wrong setting value',
+        203 => 'Settings are missed',
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

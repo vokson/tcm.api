@@ -31,6 +31,9 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/test_pm', 'ApiAuthController@test');
         Route::post('/test_admin', 'ApiAuthController@test');
 
+        Route::post('/settings/get', 'SettingsController@get');
+        Route::post('/settings/set', 'SettingsController@set');
+
     });
 
 });
