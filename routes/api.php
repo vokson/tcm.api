@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 Route::middleware(['cors'])->group(function () {
 
     Route::post('/auth/login', 'ApiAuthController@login');
+    Route::post('/auth/login/token', 'ApiAuthController@loginByToken');
     Route::post('/auth/check_token', 'ApiAuthController@isTokenValid');
 
     Route::post('/test_guest', 'ApiAuthController@test');

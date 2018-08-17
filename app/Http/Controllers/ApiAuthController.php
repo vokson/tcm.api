@@ -9,7 +9,7 @@ use App\Http\Controllers\FeedbackController As Feedback;
 
 class ApiAuthController extends Controller
 {
-    private static $tokenLifeTime = 10000;
+    private static $tokenLifeTime = 10;
 
     public function login(Request $request)
     {
@@ -18,15 +18,44 @@ class ApiAuthController extends Controller
 
         $user = ApiUser::where('email', $email)->where('password', $password)->first();
 
-        if ($user->active == true) {
+        if ($user && $user->active == true) {
 
             $token = bin2hex(random_bytes(30));
             $user->access_token = $token;
             $user->save();
 
-            return Feedback::getFeedback(0, ['access_token' => $user->access_token]);
+            return Feedback::getFeedback(0, [
+                'access_token' => $user->access_token,
+                'name' => $user->name,
+                'surname' => $user->surname,
+                'role' => $user->role,
+                'email' => $user->email
+            ]);
 
         } else  return Feedback::getFeedback(101);
+
+    }
+
+
+    public function loginByToken(Request $request)
+    {
+        $token = $request->input('access_token');
+        $user = ApiUser::where('access_token', $token)->first();
+
+        if ($user && $user->active == true && $token != "") {
+
+            $interval = strtotime('now') - strtotime($user->updated_at);
+            if ($interval > self::$tokenLifeTime) return Feedback::getFeedback(102);
+
+            return Feedback::getFeedback(0, [
+                'access_token' => $user->access_token,
+                'name' => $user->name,
+                'surname' => $user->surname,
+                'role' => $user->role,
+                'email' => $user->email
+            ]);
+
+        } else  return Feedback::getFeedback(102);
 
     }
 
