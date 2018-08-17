@@ -59,7 +59,9 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'auth.api' => \App\Http\Middleware\ApiAccessToken::class,
+
+        'auth.api.token' => \App\Http\Middleware\ApiAccessToken::class,
+        'auth.api.roles' => \App\Http\Middleware\ApiCheckRole::class,
         'cors' => \Barryvdh\Cors\HandleCors::class,
     ];
 }

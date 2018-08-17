@@ -18,7 +18,7 @@ class ApiAuthController extends Controller
 
         $user = ApiUser::where('email', $email)->where('password', $password)->first();
 
-        if ($user) {
+        if ($user->active == true) {
 
             $token = bin2hex(random_bytes(30));
             $user->access_token = $token;

@@ -22,9 +22,13 @@ Route::middleware(['cors'])->group(function () {
     Route::post('/auth/login', 'ApiAuthController@login');
     Route::post('/auth/check_token', 'ApiAuthController@isTokenValid');
 
-    Route::middleware(['auth.api'])->group(function () {
+    Route::post('/test_guest', 'ApiAuthController@test');
 
-        Route::post('/test', 'ApiAuthController@test');
+    Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
+
+        Route::post('/test_engineer', 'ApiAuthController@test');
+        Route::post('/test_pm', 'ApiAuthController@test');
+        Route::post('/test_admin', 'ApiAuthController@test');
 
     });
 

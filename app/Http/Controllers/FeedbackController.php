@@ -7,7 +7,8 @@ class FeedbackController extends Controller
     private static $errors = [
         101 => 'Authentication failed. Incorrect login\password',
         102 => 'Token is expired',
-        103 => 'Invalid token'
+        103 => 'Invalid token',
+        104 => 'Permission denied'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])
