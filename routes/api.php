@@ -27,12 +27,18 @@ Route::middleware(['cors'])->group(function () {
 
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
 
-        Route::post('/test_engineer', 'ApiAuthController@test');
-        Route::post('/test_pm', 'ApiAuthController@test');
-        Route::post('/test_admin', 'ApiAuthController@test');
-
+//        Route::post('/test_engineer', 'ApiAuthController@test');
+//        Route::post('/test_pm', 'ApiAuthController@test');
+//        Route::post('/test_admin', 'ApiAuthController@test');
+//
         Route::post('/settings/get', 'SettingsController@get');
         Route::post('/settings/set', 'SettingsController@set');
+
+        Route::post('/logs/get', 'LogController@get');
+        Route::post('/logs/set', 'LogController@set');
+
+        Route::post('/titles/get', 'TitleController@get');
+        Route::post('/users/get', 'ApiAuthController@getListOfUsers');
 
     });
 

@@ -75,8 +75,31 @@ class ApiAuthController extends Controller
 
     }
 
-    public function test(Request $request)
+    public function getListOfUsers(Request $request)
     {
-        return Feedback::getFeedback(0, ['text'=> 'TEST FUNCTION IS WORKING']);
+        $users = ApiUser::all();
+        $parameters = [];
+
+
+        foreach ($users as $item) {
+            $parameters[] = array_filter($item->toArray(), function ($k) {
+                return ($k == 'id' || $k == 'name' || $k == 'surname');
+            }, ARRAY_FILTER_USE_KEY);
+        }
+
+        // Сортируем массив по фамилии, затем по имени
+        usort($parameters, array($this, "cmp"));
+
+        return Feedback::getFeedback(0, [
+            "items" => $parameters
+        ]);
+
+    }
+
+    private function cmp($a, $b)
+    {
+        $result = strcmp($a['surname'], $b['surname']);
+        return ($result == 0) ? strcmp($a['name'], $b['name']) : $result;
+
     }
 }

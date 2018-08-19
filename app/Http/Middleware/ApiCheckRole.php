@@ -13,15 +13,15 @@ class ApiCheckRole
     function __construct() {
 
         $engineer = [
-            "api/test_engineer"
+            "api/logs/get",
+            "api/logs/set",
+            "api/titles/get",
+            "api/users/get"
         ];
 
-        $pm = [
-            "api/test_pm"
-        ];
+        $pm = [        ];
 
         $admin = [
-            "api/test_admin",
             "api/settings/get",
             "api/settings/set",
         ];
