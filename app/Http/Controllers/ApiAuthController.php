@@ -28,7 +28,8 @@ class ApiAuthController extends Controller
                 'name' => $user->name,
                 'surname' => $user->surname,
                 'role' => $user->role,
-                'email' => $user->email
+                'email' => $user->email,
+                'id' => $user->id
             ]);
 
         } else  return Feedback::getFeedback(101);
@@ -51,7 +52,8 @@ class ApiAuthController extends Controller
                 'name' => $user->name,
                 'surname' => $user->surname,
                 'role' => $user->role,
-                'email' => $user->email
+                'email' => $user->email,
+                'id' => $user->id
             ]);
 
         } else  return Feedback::getFeedback(102);

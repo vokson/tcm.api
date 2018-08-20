@@ -27,22 +27,63 @@ class LogController extends Controller
         if (!Input::has('what')) {
             return Feedback::getFeedback(304);
         }
-        $log = new Log;
+        if (!Input::has('date')) {
+            return Feedback::getFeedback(306);
+        }
+
+
+        $id = null;
+        if (Input::has('id')) {
+
+            if (!Log::where('id', '=', Input::get('id'))->exists()) {
+                return Feedback::getFeedback(305);
+            } else {
+                $id = $request->input('id');
+            }
+        }
+
+        if (is_null($id)) {
+            $log = new Log;
+        } else {
+            $log = Log::find($id);
+        }
+
         $log->to = $request->input('to');
         $log->from = $request->input('from');
         $log->title = $request->input('title');
+        $log->created_at = $request->input('date');
+
         $log->what = trim($request->input('what'));
         if ($log->what == "") {
             return Feedback::getFeedback(304);
         }
+
         $log->save();
+
         return Feedback::getFeedback(0);
     }
 
-    private function user_walk(&$item, $key)
+    public function delete(Request $request)
     {
-        $userAssoc[$item->id] = $item->surname . ' ' . $item->name;
+
+        if (!Input::has('id')) {
+            return Feedback::getFeedback(305);
+        }
+
+        if (!Log::where('id', '=', Input::get('id'))->exists()) {
+            return Feedback::getFeedback(305);
+        }
+
+        $log = Log::find($request->input('id'));
+        $log->delete();
+
+        return Feedback::getFeedback(0);
     }
+
+//    private function user_walk(&$item, $key)
+//    {
+//        $userAssoc[$item->id] = $item->surname . ' ' . $item->name;
+//    }
 
 
     public function get(Request $request)
@@ -71,11 +112,6 @@ class LogController extends Controller
         if ($timestamp != "") {
             $dayStartDate = DateTime::createFromFormat('U', $timestamp)->setTime(0, 0, 0)->format('U');
             $dayEndDate = DateTime::createFromFormat('U', $timestamp)->setTime(23, 59, 59)->format('U');
-
-//            $items = $items
-//                ->where('date', '>=', $dayStartDate)
-//                ->where('date', '<=', $dayEndDate)
-//                ->get();
         }
 
         // TO
@@ -136,7 +172,7 @@ class LogController extends Controller
             ->whereIn('to', $idUsersTo)
             ->whereIn('from', $idUsersFrom)
             ->whereIn('title', $idTitles)
-            ->select(['what', 'to', 'from', 'title', 'created_at as date'])
+            ->select(['id', 'what', 'to', 'from', 'title', 'created_at as date'])
             ->orderBy('date', 'asc')
             ->get();
 
@@ -153,9 +189,6 @@ class LogController extends Controller
 
         return Feedback::getFeedback(0, [
             'items' => $items->toArray(),
-//            'start' => $dayStartDate,
-//            'end' => $dayEndDate,
-//            'date' => date('l jS \of F Y h:i:s A')
         ]);
 
     }

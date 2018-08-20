@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 class FeedbackController extends Controller
 {
     private static $errors = [
-        // Authentication 1xx
+        // Authentication
         101 => 'Authentication failed. Incorrect login\password',
         102 => 'Token is expired',
         103 => 'Invalid token',
@@ -19,6 +19,8 @@ class FeedbackController extends Controller
         302 => 'Wrong input From',
         303 => 'Wrong input Title',
         304 => 'Wrong input What',
+        305 => 'Wrong input Id',
+        306 => 'Wrong input Date',
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

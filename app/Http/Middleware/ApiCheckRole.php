@@ -15,6 +15,7 @@ class ApiCheckRole
         $engineer = [
             "api/logs/get",
             "api/logs/set",
+            "api/logs/delete",
             "api/titles/get",
             "api/users/get"
         ];

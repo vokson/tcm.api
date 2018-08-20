@@ -36,6 +36,7 @@ Route::middleware(['cors'])->group(function () {
 
         Route::post('/logs/get', 'LogController@get');
         Route::post('/logs/set', 'LogController@set');
+        Route::post('/logs/delete', 'LogController@delete');
 
         Route::post('/titles/get', 'TitleController@get');
         Route::post('/users/get', 'ApiAuthController@getListOfUsers');
