@@ -9,4 +9,7 @@ class Log extends Model
     protected $fillable = [
         'from', 'to', 'title', 'what'
     ];
+
+    protected $dateFormat = 'U';
+
 }
