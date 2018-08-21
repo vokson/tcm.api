@@ -23,6 +23,11 @@ class FeedbackController extends Controller
         304 => 'Wrong input What',
         305 => 'Wrong input Id',
         306 => 'Wrong input Date',
+        //Title
+        401 => 'Wrong input Id',
+        402 => 'Wrong input Name',
+        403 => 'Wrong input Status',
+        404 => 'Wrong input Predecessor'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

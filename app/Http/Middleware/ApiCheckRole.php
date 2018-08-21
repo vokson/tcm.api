@@ -21,7 +21,10 @@ class ApiCheckRole
             "api/statuses/get"
         ];
 
-        $pm = [];
+        $pm = [
+            "api/titles/set",
+            "api/titles/delete",
+        ];
 
         $admin = [
             "api/settings/get",
