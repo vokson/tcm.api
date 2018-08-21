@@ -9,4 +9,6 @@ class Title extends Model
     protected $fillable = [
         'name'
     ];
+
+    protected $dateFormat = 'U';
 }

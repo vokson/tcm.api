@@ -80,12 +80,6 @@ class LogController extends Controller
         return Feedback::getFeedback(0);
     }
 
-//    private function user_walk(&$item, $key)
-//    {
-//        $userAssoc[$item->id] = $item->surname . ' ' . $item->name;
-//    }
-
-
     public function get(Request $request)
     {
 

@@ -4,10 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Setting extends Model
+class Status extends Model
 {
     protected $fillable = [
-        'name', 'value'
+        'name'
     ];
 
     protected $dateFormat = 'U';

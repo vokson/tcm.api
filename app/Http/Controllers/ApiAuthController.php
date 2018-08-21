@@ -10,6 +10,12 @@ use App\Http\Controllers\SettingsController As Settings;
 
 class ApiAuthController extends Controller
 {
+
+    private static function isTokenAlive($timeOfLastVisit)
+    {
+        return (Settings::take('TOKEN_LIFE_TIME') > (time() - $timeOfLastVisit->timestamp));
+    }
+
     public function login(Request $request)
     {
         $email = $request->input('email');
@@ -44,8 +50,7 @@ class ApiAuthController extends Controller
 
         if ($user && $user->active == true && $token != "") {
 
-            $interval = strtotime('now') - strtotime($user->updated_at);
-            if ($interval > Settings::take('TOKEN_LIFE_TIME')) return Feedback::getFeedback(102);
+            if (!self::isTokenAlive($user->updated_at)) Feedback::getFeedback(102);
 
             return Feedback::getFeedback(0, [
                 'access_token' => $user->access_token,
@@ -67,8 +72,7 @@ class ApiAuthController extends Controller
 
         if ($user && $token != "") {
 
-            $interval = strtotime('now') - strtotime($user->updated_at);
-            if ($interval > Settings::take('TOKEN_LIFE_TIME')) return Feedback::getFeedback(102);
+            if (!self::isTokenAlive($user->updated_at)) return Feedback::getFeedback(102);
 
             return Feedback::getFeedback(0);
         }

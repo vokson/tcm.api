@@ -14,6 +14,8 @@ class FeedbackController extends Controller
         201 => 'Wrong setting name',
         202 => 'Wrong setting value',
         203 => 'Settings are missed',
+        204 => 'Items are missed',
+        205 => 'Wrong setting id',
         //Log
         301 => 'Wrong input To',
         302 => 'Wrong input From',

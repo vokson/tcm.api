@@ -17,14 +17,18 @@ class ApiCheckRole
             "api/logs/set",
             "api/logs/delete",
             "api/titles/get",
-            "api/users/get"
+            "api/users/get",
+            "api/statuses/get"
         ];
 
-        $pm = [        ];
+        $pm = [];
 
         $admin = [
             "api/settings/get",
             "api/settings/set",
+            "api/statuses/set",
+            "api/statuses/add",
+            "api/statuses/delete"
         ];
 
         $this->permissions = [

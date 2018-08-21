@@ -15,4 +15,5 @@ class ApiUser extends Model
     ];
 
     public $timestamps = true;
+    protected $dateFormat = 'U';
 }
