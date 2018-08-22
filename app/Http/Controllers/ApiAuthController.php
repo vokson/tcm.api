@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\ApiUser;
 use Illuminate\Http\Request;
-use DateTime;
 use App\Http\Controllers\FeedbackController As Feedback;
 use App\Http\Controllers\SettingsController As Settings;
+use Illuminate\Support\Facades\Input;
 
 class ApiAuthController extends Controller
 {
@@ -35,7 +35,9 @@ class ApiAuthController extends Controller
                 'surname' => $user->surname,
                 'role' => $user->role,
                 'email' => $user->email,
-                'id' => $user->id
+                'id' => $user->id,
+                'isDefaultPassword' =>
+                    (hash('sha256',Settings::take('DEFAULT_PASSWORD')) === $user->password)
             ]);
 
         } else  return Feedback::getFeedback(101);
@@ -58,7 +60,9 @@ class ApiAuthController extends Controller
                 'surname' => $user->surname,
                 'role' => $user->role,
                 'email' => $user->email,
-                'id' => $user->id
+                'id' => $user->id,
+                'isDefaultPassword' =>
+                    (hash('sha256',Settings::take('DEFAULT_PASSWORD')) === $user->password)
             ]);
 
         } else  return Feedback::getFeedback(102);
@@ -81,31 +85,7 @@ class ApiAuthController extends Controller
 
     }
 
-    public function getListOfUsers(Request $request)
-    {
-        $users = ApiUser::all();
-        $parameters = [];
 
 
-        foreach ($users as $item) {
-            $parameters[] = array_filter($item->toArray(), function ($k) {
-                return ($k == 'id' || $k == 'name' || $k == 'surname');
-            }, ARRAY_FILTER_USE_KEY);
-        }
 
-        // Сортируем массив по фамилии, затем по имени
-        usort($parameters, array($this, "cmp"));
-
-        return Feedback::getFeedback(0, [
-            "items" => $parameters
-        ]);
-
-    }
-
-    private function cmp($a, $b)
-    {
-        $result = strcmp($a['surname'], $b['surname']);
-        return ($result == 0) ? strcmp($a['name'], $b['name']) : $result;
-
-    }
 }

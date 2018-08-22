@@ -124,7 +124,7 @@ class TitleController extends Controller
                 if ($predecessor == "") {
                     $query->orWhereNull('predecessor');
                 }
-                    
+
             })
             ->whereIn('status', $idStatuses)
 //            ->whereIn('predecessor', $idPredecessors)

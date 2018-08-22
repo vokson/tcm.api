@@ -27,6 +27,8 @@ Route::middleware(['cors'])->group(function () {
 
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
 
+        Route::post('/auth/change_password', 'UserController@changePassword');
+
         Route::post('/settings/get', 'SettingsController@get');
         Route::post('/settings/set', 'SettingsController@set');
 
@@ -43,7 +45,9 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/titles/set', 'TitleController@set');
         Route::post('/titles/delete', 'TitleController@delete');
 
-        Route::post('/users/get', 'ApiAuthController@getListOfUsers');
+        Route::post('/users/get', 'UserController@get');
+        Route::post('/users/set', 'UserController@set');
+        Route::post('/users/delete', 'UserController@delete');
 
     });
 

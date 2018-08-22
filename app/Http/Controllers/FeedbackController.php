@@ -10,6 +10,7 @@ class FeedbackController extends Controller
         102 => 'Token is expired',
         103 => 'Invalid token',
         104 => 'Permission denied',
+        105 => 'Wrong new password',
         // Admin
         201 => 'Wrong setting name',
         202 => 'Wrong setting value',
@@ -27,7 +28,14 @@ class FeedbackController extends Controller
         401 => 'Wrong input Id',
         402 => 'Wrong input Name',
         403 => 'Wrong input Status',
-        404 => 'Wrong input Predecessor'
+        404 => 'Wrong input Predecessor',
+        //User
+        501 => 'Wrong input Id',
+        502 => 'Wrong input E-mail',
+        503 => 'Wrong input Surname',
+        504 => 'Wrong input Name',
+        505 => 'Wrong input Role',
+        506 => 'Wrong input Active'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

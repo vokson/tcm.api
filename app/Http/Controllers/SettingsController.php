@@ -20,18 +20,16 @@ class SettingsController extends Controller
 
     public function get(Request $request)
     {
-        $settings = Setting::all();
         $parameters = [];
 
-
-        foreach ($settings as $item) {
+        foreach (Setting::all() as $item) {
             $parameters[] = array_filter($item->toArray(), function ($k) {
                 return ($k == 'name' || $k == 'value');
             }, ARRAY_FILTER_USE_KEY);
         }
 
         return Feedback::getFeedback(0, [
-            "settings" => $parameters
+            "items" => $parameters
         ]);
 
 
@@ -40,13 +38,11 @@ class SettingsController extends Controller
     public function set(Request $request)
     {
 
-        if (!Input::has('settings')) {
+        if (!Input::has('items')) {
             return Feedback::getFeedback(203);
         }
 
-        $settings = $request->input('settings');
-
-        foreach ($settings as $item) {
+        foreach ($request->input('items') as $item) {
 
             if (!array_key_exists('name', $item)) {
                 return Feedback::getFeedback(201);
