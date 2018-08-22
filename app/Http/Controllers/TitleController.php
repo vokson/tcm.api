@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use App\Title;
+use App\Http\Controllers\LogController;
+use App\Http\Controllers\SettingsController;
 
 class TitleController extends Controller
 {
@@ -24,11 +26,6 @@ class TitleController extends Controller
         if (!Input::has('predecessor')) {
             return Feedback::getFeedback(404);
         }
-
-
-//        if (!Title::where('id', '=', Input::get('predecessor'))->exists() && Input::get('predecessor') != 0) {
-//            return Feedback::getFeedback(404);
-//        }
 
         $id = null;
         if (Input::has('id')) {
@@ -55,6 +52,13 @@ class TitleController extends Controller
         }
 
         $title->save();
+
+        LogController::createNewLog([
+            'to' => SettingsController::take('SYSTEM_USER_ID'),
+            'from' => SettingsController::take('SYSTEM_USER_ID'),
+            'title' => $title->id,
+            'what' => 'СТАТУС => ' . Status::find($title->status)->name
+        ]);
 
         return Feedback::getFeedback(0);
     }
@@ -88,32 +92,6 @@ class TitleController extends Controller
 
         $idNamesStatuses = array_combine($idStatuses->toArray(), $namesStatuses->toArray());
 
-//        // PREDECESSOR
-//
-//        $predecessors = DB::table('titles')
-//            ->where('name', 'like', '%' . $predecessor . '%')
-//            ->select('id', 'name')
-//            ->get();
-//
-//        $idPredecessors = $predecessors->map(function ($item) {
-//            return $item->id;
-//        });
-//
-//
-//        $namesPredecessors = $predecessors->map(function ($item) {
-//            return $item->name;
-//        });
-//
-//        // Если поиск по predecessor не ведется
-//        if ($predecessor == "") {
-//            $idPredecessors->push(0); // Добавляем, чтобы искались поля без predecessor
-//            $namesPredecessors->push(""); // Добавляем, чтобы было поле, соответствующее 0 в $idPredecessors
-//        }
-//
-//        $idNamesPredecessors = array_combine($idPredecessors->toArray(), $namesPredecessors->toArray());
-
-
-//       var_dump($idPredecessors);
 
         $items = DB::table('titles')
             ->where('name', 'like', '%' . $name . '%')
@@ -127,12 +105,9 @@ class TitleController extends Controller
 
             })
             ->whereIn('status', $idStatuses)
-//            ->whereIn('predecessor', $idPredecessors)
             ->select(['id', 'name', 'status', 'predecessor'])
             ->orderBy('name', 'asc')
             ->get();
-
-//        var_dump($idStatuses);
 
 
         // Подменяем id на значения полей из других таблиц
@@ -140,11 +115,6 @@ class TitleController extends Controller
         $items->transform(function ($item, $key) use ($idNamesStatuses) {
 
             $item->status = $idNamesStatuses[$item->status];
-
-//            if (array_key_exists($item->predecessor, $idNamesPredecessors)) {
-//                $item->predecessor = $idNamesPredecessors[$item->predecessor];
-//            }
-
             return $item;
         });
 

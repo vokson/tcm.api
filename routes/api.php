@@ -49,6 +49,8 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/users/set', 'UserController@set');
         Route::post('/users/delete', 'UserController@delete');
 
+        Route::post('/service/database/backup', 'ServiceController@getDatabaseBackup');
+
     });
 
 });

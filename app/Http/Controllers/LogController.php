@@ -63,6 +63,16 @@ class LogController extends Controller
         return Feedback::getFeedback(0);
     }
 
+    public static function createNewLog($parameters)
+    {
+        $log = new Log;
+        $log->to = $parameters['to'];
+        $log->from = $parameters['from'];
+        $log->title = $parameters['title'];
+        $log->what = $parameters['what'];
+        $log->save();
+    }
+
     public function delete(Request $request)
     {
 

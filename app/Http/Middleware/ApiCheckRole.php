@@ -36,6 +36,7 @@ class ApiCheckRole
             "api/statuses/delete",
             "api/users/set",
             "api/users/delete",
+            'api/service/database/backup'
         ];
 
         $this->permissions = [
