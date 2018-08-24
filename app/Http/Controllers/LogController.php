@@ -93,21 +93,12 @@ class LogController extends Controller
     public function get(Request $request)
     {
 
-        $to = "";
-        if (Input::has('to')) $to = trim($request->input('to'));
-
-        $from = "";
-        if (Input::has('from')) $from = trim($request->input('from'));
-
-        $title = "";
-        if (Input::has('title')) $title = trim($request->input('title'));
-
-        $what = "";
-        if (Input::has('what')) $what = trim($request->input('what'));
-
-        $timestamp = "";
-        if (Input::has('date')) $timestamp = trim($request->input('date'));
-
+        $to = trim(Input::get('to', ''));
+        $from = trim(Input::get('from', ''));
+        $title = trim(Input::get('title', ''));
+        $what = trim(Input::get('what', ''));
+        $timestamp = trim(Input::get('date', ''));
+        $isOnlyLast = trim(Input::get('is_only_last', false));
 
         //DATE
         $dayStartDate = 1;
@@ -170,13 +161,23 @@ class LogController extends Controller
         $idNamesTitles = array_combine($idTitles->toArray(), $namesTitles->toArray());
 
 
-        $items = DB::table('logs')
+        $query = DB::table('logs')
             ->whereBetween('created_at', [$dayStartDate, $dayEndDate])
             ->where('what', 'like', '%' . $what . '%')
             ->whereIn('to', $idUsersTo)
             ->whereIn('from', $idUsersFrom)
-            ->whereIn('title', $idTitles)
-            ->select(['id', 'what', 'to', 'from', 'title', 'created_at as date'])
+            ->whereIn('title', $idTitles);
+
+        if ($isOnlyLast == true) {
+            $query
+                ->select(DB::raw('"id", "what", "to", "from", "title", max("created_at") as "date"'))
+                ->groupBy('title');
+
+        } else {
+            $query->select(['id', 'what', 'to', 'from', 'title', 'created_at as date']);
+        }
+
+        $items = $query
             ->orderBy('date', 'asc')
             ->get();
 

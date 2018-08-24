@@ -37,7 +37,7 @@ class ApiAuthController extends Controller
                 'email' => $user->email,
                 'id' => $user->id,
                 'isDefaultPassword' =>
-                    (hash('sha256',Settings::take('DEFAULT_PASSWORD')) === $user->password)
+                    (hash('sha256', Settings::take('DEFAULT_PASSWORD')) === $user->password)
             ]);
 
         } else  return Feedback::getFeedback(101);
@@ -52,7 +52,7 @@ class ApiAuthController extends Controller
 
         if ($user && $user->active == true && $token != "") {
 
-            if (!self::isTokenAlive($user->updated_at)) Feedback::getFeedback(102);
+            if (!self::isTokenAlive($user->updated_at)) return Feedback::getFeedback(102);
 
             return Feedback::getFeedback(0, [
                 'access_token' => $user->access_token,
@@ -62,7 +62,7 @@ class ApiAuthController extends Controller
                 'email' => $user->email,
                 'id' => $user->id,
                 'isDefaultPassword' =>
-                    (hash('sha256',Settings::take('DEFAULT_PASSWORD')) === $user->password)
+                    (hash('sha256', Settings::take('DEFAULT_PASSWORD')) === $user->password)
             ]);
 
         } else  return Feedback::getFeedback(102);
@@ -84,8 +84,6 @@ class ApiAuthController extends Controller
         return Feedback::getFeedback(103);
 
     }
-
-
 
 
 }
