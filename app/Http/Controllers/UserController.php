@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\DB;
@@ -77,7 +78,12 @@ class UserController extends Controller
             return Feedback::getFeedback(501);
         }
 
-        $user->delete();
+        try {
+            $user->delete();
+        } catch (QueryException $e) {
+            return Feedback::getFeedback(206);
+        }
+
 
         return Feedback::getFeedback(0);
     }

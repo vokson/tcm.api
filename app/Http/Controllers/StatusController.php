@@ -31,7 +31,12 @@ class StatusController extends Controller
         }
 
         $item = Status::find($request->input('id'));
-        $item->delete();
+
+        try {
+            $item->delete();
+        } catch (QueryException $e) {
+            return Feedback::getFeedback(206);
+        }
 
         return Feedback::getFeedback(0);
     }

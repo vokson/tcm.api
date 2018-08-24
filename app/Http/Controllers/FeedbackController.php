@@ -17,6 +17,7 @@ class FeedbackController extends Controller
         203 => 'Settings are missed',
         204 => 'Items are missed',
         205 => 'Wrong setting id',
+        206 => 'Foreign key exception',
         //Log
         301 => 'Wrong input To',
         302 => 'Wrong input From',

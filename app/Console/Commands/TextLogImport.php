@@ -98,9 +98,12 @@ class TextLogImport extends Command
 
         foreach ($blocks as $key => $arr) {
 
-            $dateStr = ($key === 'HEADER') ? ($firstDate-1) : $key;
+            $dateStr = ($key === 'HEADER') ? $firstDate : $key;
             $date = DateTime::createFromFormat('d.m.Y', $dateStr);
             $timestamp = $date->getTimestamp();
+
+            //Убаевляем одну секунду, если HEADER
+            $timestamp -= 1;
 
             $what = '';
 

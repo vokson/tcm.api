@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Status;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
@@ -138,7 +139,13 @@ class TitleController extends Controller
         }
 
         $title = Title::find($request->input('id'));
-        $title->delete();
+
+
+        try {
+            $title->delete();
+        } catch (QueryException $e) {
+            return Feedback::getFeedback(206);
+        }
 
         return Feedback::getFeedback(0);
     }
