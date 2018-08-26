@@ -23,6 +23,8 @@ class ApiCheckRole
             "api/statuses/get"
         ];
 
+        $group_leader = [];
+
         $pm = [
             "api/titles/set",
             "api/titles/delete",
@@ -41,8 +43,9 @@ class ApiCheckRole
 
         $this->permissions = [
             "engineer" => array_merge($engineer),
-            "pm" => array_merge($engineer, $pm),
-            "admin" => array_merge($engineer, $pm, $admin)
+            "group_leader" => array_merge($engineer, $group_leader),
+            "pm" => array_merge($engineer, $group_leader, $pm),
+            "admin" => array_merge($engineer, $group_leader, $pm, $admin)
         ];
     }
 
