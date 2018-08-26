@@ -30,7 +30,7 @@ class CleanDatabaseBackup extends Command
         parent::__construct();
     }
 
-    const LIFE_TIME = 3*60;
+    const LIFE_TIME = 14*24*60*60; // 2 weeks
     const LOG_FILENAME = 'error_log.txt';
 
     /**
