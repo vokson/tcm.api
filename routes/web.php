@@ -12,7 +12,6 @@
 */
 
 Route::get('/', function () {
-    unlink('/mnt/test/laravel.txt');
     return view('welcome');
 });
 
