@@ -12,6 +12,7 @@
 */
 
 Route::get('/', function () {
+    file_put_contents("/mnt/test/laravel.txt", time(), FILE_APPEND | LOCK_EX);
     return view('welcome');
 });
 
