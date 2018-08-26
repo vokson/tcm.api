@@ -54,12 +54,12 @@ class TitleController extends Controller
 
         $title->save();
 
-        LogController::createNewLog([
-            'to' => SettingsController::take('SYSTEM_USER_ID'),
-            'from' => SettingsController::take('SYSTEM_USER_ID'),
-            'title' => $title->id,
-            'what' => 'СТАТУС => ' . Status::find($title->status)->name
-        ]);
+//        LogController::createNewLog([
+//            'to' => SettingsController::take('SYSTEM_USER_ID'),
+//            'from' => SettingsController::take('SYSTEM_USER_ID'),
+//            'title' => $title->id,
+//            'what' => 'СТАТУС => ' . Status::find($title->status)->name
+//        ]);
 
         return Feedback::getFeedback(0);
     }
