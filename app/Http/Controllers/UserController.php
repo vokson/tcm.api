@@ -65,6 +65,21 @@ class UserController extends Controller
         return Feedback::getFeedback(0);
     }
 
+    public function setDefaultPassword()
+    {
+        $id = Input::get('id', null);
+
+        if (!ApiUser::where('id', '=', $id)->exists()) {
+            return Feedback::getFeedback(501);
+        }
+
+        $user = ApiUser::find($id);
+        $user->password = hash('sha256', Settings::take('DEFAULT_PASSWORD'));
+        $user->save();
+
+        return Feedback::getFeedback(0);
+    }
+
     public function delete(Request $request)
     {
 

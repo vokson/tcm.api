@@ -37,6 +37,7 @@ class ApiCheckRole
             "api/statuses/add",
             "api/statuses/delete",
             "api/users/set",
+            "api/users/set/default/password",
             "api/users/delete",
             'api/service/database/backup'
         ];
