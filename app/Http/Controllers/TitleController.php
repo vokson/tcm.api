@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use App\Title;
-use App\Http\Controllers\LogController;
-use App\Http\Controllers\SettingsController;
 
 class TitleController extends Controller
 {
@@ -25,6 +23,14 @@ class TitleController extends Controller
         }
 
         if (!Input::has('predecessor')) {
+            return Feedback::getFeedback(404);
+        }
+
+        if (!Input::has('description')) {
+            return Feedback::getFeedback(404);
+        }
+
+        if (!Input::has('volume')) {
             return Feedback::getFeedback(404);
         }
 
@@ -47,6 +53,8 @@ class TitleController extends Controller
         $title->name = trim($request->input('name'));
         $title->status = $request->input('status');
         $title->predecessor = $request->input('predecessor');
+        $title->description = $request->input('description');
+        $title->volume = $request->input('volume');
 
         if ($title->name == "") {
             return Feedback::getFeedback(402);
@@ -66,15 +74,11 @@ class TitleController extends Controller
 
     public function get(Request $request)
     {
-        $name = "";
-        if (Input::has('name')) $name = trim($request->input('name'));
-
-        $status = "";
-        if (Input::has('status')) $status = trim($request->input('status'));
-
-        $predecessor = "";
-        if (Input::has('predecessor')) $predecessor = trim($request->input('predecessor'));
-
+        $name = trim(Input::get('name', ''));
+        $status = trim(Input::get('status', ''));
+        $predecessor = trim(Input::get('predecessor', ''));
+        $description = trim(Input::get('description', ''));
+        $volume = trim(Input::get('volume', ''));
 
         // STATUS
 
@@ -105,8 +109,27 @@ class TitleController extends Controller
                 }
 
             })
+            ->where(function ($query) use ($description){
+
+                $query->where('description', 'like', '%' . $description . '%');
+
+                if ($description == "") {
+                    $query->orWhereNull('description');
+                }
+
+            })
+            ->where(function ($query) use ($volume) {
+
+                $query->where('volume', 'like', '%' . $volume . '%');
+
+                if ($volume == "") {
+                    $query->orWhereNull('volume');
+                }
+
+            })
+
             ->whereIn('status', $idStatuses)
-            ->select(['id', 'name', 'status', 'predecessor'])
+            ->select(['id', 'name', 'status', 'predecessor', 'description', 'volume'])
             ->orderBy('name', 'asc')
             ->get();
 
