@@ -43,7 +43,14 @@ class LogController extends Controller
         }
 
         if (is_null($id)) {
+
             $log = new Log;
+
+            $token = $request->input('access_token');
+            $user = ApiUser::where('access_token', $token)->first();
+
+            $log->owner =  $user->id;
+
         } else {
             $log = Log::find($id);
         }
