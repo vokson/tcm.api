@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
 use App\ApiUser;
+use Illuminate\Support\Facades\Input;
+use App\Log;
 
 class ApiCheckRole
 {
@@ -66,6 +68,24 @@ class ApiCheckRole
 
         if (!in_array($request->path(), $permittedUrls)) {
             return Feedback::getFeedback(104);
+        }
+
+        // Ограничиваем редактирование записей Log для не собственников записей
+        // в случае, если role = engineer
+        if (
+            $role == 'engineer' &&
+            Input::has('id') &&
+            ($request->path() == "api/logs/set" || $request->path() == "api/logs/delete")
+        ) {
+            $log = Log::find(Input::get('id'));
+
+            if (is_null($log)) {
+                return Feedback::getFeedback(104);
+            }
+
+            if ($log->owner != $user->id) {
+                return Feedback::getFeedback(104);
+            }
         }
 
         return $next($request);
