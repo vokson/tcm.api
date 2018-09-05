@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Log;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
@@ -18,5 +19,10 @@ class ServiceController extends Controller
         return response()->download(database_path('database.sqlite'), "", $headers);
     }
 
+    public function uploadFile(Request $request)
+    {
+        $path = Storage::putFile('avatars', $request->file('test_file'));
+        return $path;
+    }
 
 }

@@ -24,6 +24,7 @@ Route::middleware(['cors'])->group(function () {
     Route::post('/auth/check_token', 'ApiAuthController@isTokenValid');
 
     Route::post('/test_guest', 'ApiAuthController@test');
+    Route::post('/upload_file', 'ServiceController@uploadFile');
 
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
 
