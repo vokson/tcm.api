@@ -25,4 +25,10 @@ class ServiceController extends Controller
         return $path;
     }
 
+    public function info()
+    {
+        phpinfo();
+        return;
+    }
+
 }
