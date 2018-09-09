@@ -22,7 +22,11 @@ class ApiCheckRole
             "api/logs/delete",
             "api/titles/get",
             "api/users/get",
-            "api/statuses/get"
+            "api/statuses/get",
+            "api/logs/file/upload",
+            "api/logs/file/download",
+            "api/logs/file/get",
+            "api/logs/file/delete",
         ];
 
         $group_leader = [];
@@ -75,7 +79,12 @@ class ApiCheckRole
         if (
             $role == 'engineer' &&
             Input::has('id') &&
-            ($request->path() == "api/logs/set" || $request->path() == "api/logs/delete")
+            (
+                $request->path() == "api/logs/set" ||
+                $request->path() == "api/logs/delete" ||
+                $request->path() == "api/logs/file/upload" ||
+                $request->path() == "api/logs/file/delete"
+            )
         ) {
             $log = Log::find(Input::get('id'));
 

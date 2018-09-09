@@ -36,7 +36,12 @@ class FeedbackController extends Controller
         503 => 'Wrong input Surname',
         504 => 'Wrong input Name',
         505 => 'Wrong input Role',
-        506 => 'Wrong input Active'
+        506 => 'Wrong input Active',
+        //File
+        601 => 'File is missed',
+        602 => 'Badly uploaded',
+        603 => 'File can not be deleted',
+        604 => 'Wrong input Id',
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])
