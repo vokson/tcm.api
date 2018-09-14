@@ -16,12 +16,12 @@ class LogFileController extends Controller
     {
 
         $log_id = null;
-        if (Input::has('id')) {
+        if (Input::has('log_id')) {
 
-            if (!Log::where('id', '=', Input::get('id'))->exists()) {
+            if (!Log::where('id', '=', Input::get('log_id'))->exists()) {
                 return Feedback::getFeedback(604);
             } else {
-                $log_id = $request->input('id');
+                $log_id = $request->input('log_id');
             }
         }
 
@@ -34,27 +34,38 @@ class LogFileController extends Controller
             return Feedback::getFeedback(602);
         }
 
+        if (!Input::has('uin')) {
+            return Feedback::getFeedback(605);
+        }
+
         $path = Storage::putFile('temp', $request->file('log_file'));
+
+        if ($path === false) {
+            return Feedback::getFeedback(606);
+        }
 
         $file = new UploadedFile();
         $file->original_name = $request->file('log_file')->getClientOriginalName();
         $file->size = $request->file('log_file')->getSize();
         $file->log = $log_id;
         $file->server_name = $path;
+        $file->uin = $request->input('uin');
         $file->save();
 
         return Feedback::getFeedback(0, [
-            'id' => $file->id
+            'id' => $file->id,
+            'uin' => $file->uin,
+            'log_id' => $file->log
         ]);
     }
 
     public function get(Request $request)
     {
-        $log_id = trim(Input::get('id', ''));
+        $log_id = trim(Input::get('log_id', ''));
 
         $items = DB::table('uploaded_files')
             ->where('log', '=', $log_id)
-            ->select(['id', 'original_name', 'size'])
+            ->select(['id', 'uin', 'original_name', 'size'])
             ->orderBy('id', 'asc')
             ->get();
 
@@ -89,12 +100,14 @@ class LogFileController extends Controller
             return Feedback::getFeedback(603);
         }
 
-        $log_id = $file->log;
+//        $log_id = $file->log;
+        $uin = $file->uin;
 
         $file->delete();
 
         return Feedback::getFeedback(0, [
-            'log_id' => $log_id
+//            'log_id' => $log_id,
+            'uin' => $uin
         ]);
     }
 
@@ -115,7 +128,7 @@ class LogFileController extends Controller
         $headers = array(
             'Content-Type' => 'application/octet-stream',
             'Access-Control-Expose-Headers' => 'Content-Filename',
-            'Content-Filename' =>rawurlencode($file->original_name)
+            'Content-Filename' => rawurlencode($file->original_name)
         );
 
         return response()->download(storage_path("app/" . $file->server_name), "", $headers);

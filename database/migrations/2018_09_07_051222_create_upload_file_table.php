@@ -20,6 +20,7 @@ class CreateUploadFileTable extends Migration
             $table->integer('size');
             $table->string('original_name');
             $table->string('server_name');
+            $table->string('uin');
             $table->timestamps();
         });
     }
