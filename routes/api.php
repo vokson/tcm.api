@@ -26,7 +26,7 @@ Route::middleware(['cors'])->group(function () {
     Route::post('/auth/check_token', 'ApiAuthController@isTokenValid');
 
     Route::post('/test_guest', 'ApiAuthController@test');
-    Route::post('/logs/file/upload', 'LogFileController@upload');
+
 
 
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
@@ -41,7 +41,7 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/logs/delete', 'LogController@delete');
 
         Route::post('/logs/file/get', 'LogFileController@get');
-
+        Route::post('/logs/file/upload', 'LogFileController@upload');
         Route::post('/logs/file/download', 'LogFileController@download');
         Route::post('/logs/file/delete', 'LogFileController@delete');
 
