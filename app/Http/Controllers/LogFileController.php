@@ -39,7 +39,8 @@ class LogFileController extends Controller
         }
 
         $path = Storage::putFile(
-            'log_file_storage' . DIRECTORY_SEPARATOR . $this->createFolderByNumber($log_id) . DIRECTORY_SEPARATOR . $log_id,
+            'log_file_storage' . DIRECTORY_SEPARATOR . 'FILES' . DIRECTORY_SEPARATOR .
+            $this->createFolderByNumber($log_id) . DIRECTORY_SEPARATOR . $log_id,
             $request->file('log_file')
         );
 
