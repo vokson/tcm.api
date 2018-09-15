@@ -38,7 +38,10 @@ class LogFileController extends Controller
             return Feedback::getFeedback(605);
         }
 
-        $path = Storage::putFile('temp', $request->file('log_file'));
+        $path = Storage::putFile(
+            'log_file_storage' . DIRECTORY_SEPARATOR . $this->createFolderByNumber($log_id) . DIRECTORY_SEPARATOR . $log_id,
+            $request->file('log_file')
+        );
 
         if ($path === false) {
             return Feedback::getFeedback(606);
@@ -57,6 +60,22 @@ class LogFileController extends Controller
             'uin' => $file->uin,
             'log_id' => $file->log
         ]);
+    }
+
+    protected function createFolderByNumber($number)
+    {
+        $min = intdiv($number, 1000) * 1000 + 1;
+        $max = (intdiv($number, 1000) + 1) * 1000;
+
+        if ($number % 1000 == 0) {
+            $min = $min - 1000;
+            $max = $max - 1000;
+        }
+
+//        echo "MIN = " . $min . '<br/>';
+//        echo "MAX = " . $max . '<br/>';
+
+        return sprintf("%05d-%05d", $min, $max);
     }
 
     public function get(Request $request)
