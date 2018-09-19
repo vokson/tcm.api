@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 //    return $request->user();
 //});
 
+
+
 Route::middleware(['cors'])->group(function () {
 
     Route::post('/auth/login', 'ApiAuthController@login');
@@ -24,6 +26,8 @@ Route::middleware(['cors'])->group(function () {
     Route::post('/auth/check_token', 'ApiAuthController@isTokenValid');
 
     Route::post('/test_guest', 'ApiAuthController@test');
+
+
 
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
 
@@ -35,6 +39,11 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/logs/get', 'LogController@get');
         Route::post('/logs/set', 'LogController@set');
         Route::post('/logs/delete', 'LogController@delete');
+
+        Route::post('/logs/file/get', 'LogFileController@get');
+        Route::post('/logs/file/upload', 'LogFileController@upload');
+        Route::post('/logs/file/download', 'LogFileController@download');
+        Route::post('/logs/file/delete', 'LogFileController@delete');
 
         Route::post('/statuses/get', 'StatusController@get');
         Route::post('/statuses/set', 'StatusController@set');
