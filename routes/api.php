@@ -18,7 +18,6 @@ use Illuminate\Http\Request;
 //});
 
 
-
 Route::middleware(['cors'])->group(function () {
 
     Route::post('/auth/login', 'ApiAuthController@login');
@@ -28,7 +27,6 @@ Route::middleware(['cors'])->group(function () {
     Route::post('/test_guest', 'ApiAuthController@test');
 
 
-
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
 
         Route::post('/auth/change_password', 'UserController@changePassword');
@@ -36,14 +34,27 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/settings/get', 'SettingsController@get');
         Route::post('/settings/set', 'SettingsController@set');
 
+        // LOG
         Route::post('/logs/get', 'LogController@get');
-        Route::post('/logs/set', 'LogController@set');
-        Route::post('/logs/delete', 'LogController@delete');
 
+        Route::middleware(['auth.log.edit'])->group(function () {
+            Route::post('/logs/set', 'LogController@set');
+            Route::post('/logs/delete', 'LogController@delete');
+        });
+
+        // LOG FILE
         Route::post('/logs/file/get', 'LogFileController@get');
-        Route::post('/logs/file/upload', 'LogFileController@upload');
         Route::post('/logs/file/download', 'LogFileController@download');
-        Route::post('/logs/file/delete', 'LogFileController@delete');
+
+        Route::middleware(['auth.log.file.edit'])->group(function () {
+            Route::post('/logs/file/upload', 'LogFileController@upload');
+            Route::post('/logs/file/delete', 'LogFileController@delete');
+        });
+
+        // LOG NEW MESSAGE
+        Route::middleware(['auth.log.new.message'])->group(function () {
+            Route::post('/logs/new/message/switch', 'LogNewMessageController@set');
+        });
 
         Route::post('/statuses/get', 'StatusController@get');
         Route::post('/statuses/set', 'StatusController@set');

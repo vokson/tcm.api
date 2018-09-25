@@ -31,6 +31,10 @@ class LogController extends Controller
             return Feedback::getFeedback(306);
         }
 
+//        if (!Input::has('is_new')) {
+//            return Feedback::getFeedback(307);
+//        }
+
 
         $id = null;
         if (Input::has('id')) {
@@ -49,7 +53,7 @@ class LogController extends Controller
             $token = $request->input('access_token');
             $user = ApiUser::where('access_token', $token)->first();
 
-            $log->owner =  $user->id;
+            $log->owner = $user->id;
 
         } else {
             $log = Log::find($id);
@@ -58,7 +62,9 @@ class LogController extends Controller
         $log->to = $request->input('to');
         $log->from = $request->input('from');
         $log->title = $request->input('title');
+//        $log->is_new = $request->input('is_new');
         $log->created_at = $request->input('date');
+
 
         $log->what = trim($request->input('what'));
         if ($log->what == "") {
@@ -70,15 +76,16 @@ class LogController extends Controller
         return Feedback::getFeedback(0);
     }
 
-    public static function createNewLog($parameters)
-    {
-        $log = new Log;
-        $log->to = $parameters['to'];
-        $log->from = $parameters['from'];
-        $log->title = $parameters['title'];
-        $log->what = $parameters['what'];
-        $log->save();
-    }
+//    public static function createNewLog($parameters)
+//    {
+//        $log = new Log;
+//        $log->to = $parameters['to'];
+//        $log->from = $parameters['from'];
+//        $log->title = $parameters['title'];
+//        $log->what = $parameters['what'];
+//        $log->is_new = $parameters['is_new'];
+//        $log->save();
+//    }
 
     public function delete(Request $request)
     {
@@ -177,11 +184,11 @@ class LogController extends Controller
 
         if ($isOnlyLast == true) {
             $query
-                ->select(DB::raw('"id", "what", "to", "from", "title", max("created_at") as "date"'))
+                ->select(DB::raw('"id", "is_new", "what", "to", "from", "title", max("created_at") as "date"'))
                 ->groupBy('title');
 
         } else {
-            $query->select(['id', 'what', 'to', 'from', 'title', 'created_at as date']);
+            $query->select(['id', 'is_new', 'what', 'to', 'from', 'title', 'created_at as date']);
         }
 
         $items = $query

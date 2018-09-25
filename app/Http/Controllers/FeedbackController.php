@@ -25,6 +25,7 @@ class FeedbackController extends Controller
         304 => 'Wrong input What',
         305 => 'Wrong input Id',
         306 => 'Wrong input Date',
+        307 => 'Wrong input Is New',
         //Title
         401 => 'Wrong input Id',
         402 => 'Wrong input Name',
