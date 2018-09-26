@@ -113,6 +113,8 @@ class LogController extends Controller
         $what = trim(Input::get('what', ''));
         $timestamp = trim(Input::get('date', ''));
         $isOnlyLast = trim(Input::get('is_only_last', false));
+        $isNewMessageSearch = Input::has('is_new');
+        $is_new =(bool) Input::get('is_new', false);
 
         //DATE
         $dayStartDate = 1;
@@ -181,6 +183,16 @@ class LogController extends Controller
             ->whereIn('to', $idUsersTo)
             ->whereIn('from', $idUsersFrom)
             ->whereIn('title', $idTitles);
+
+        if ($isNewMessageSearch == true) {
+
+            $token = $request->input('access_token');
+            $user = ApiUser::where('access_token', $token)->first();
+
+
+            $query->where('is_new', '=', $is_new)
+                ->where('to', '=', $user->id);
+        }
 
         if ($isOnlyLast == true) {
             $query
