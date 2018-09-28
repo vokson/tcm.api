@@ -31,11 +31,6 @@ class LogController extends Controller
             return Feedback::getFeedback(306);
         }
 
-//        if (!Input::has('is_new')) {
-//            return Feedback::getFeedback(307);
-//        }
-
-
         $id = null;
         if (Input::has('id')) {
 
@@ -54,6 +49,7 @@ class LogController extends Controller
             $user = ApiUser::where('access_token', $token)->first();
 
             $log->owner = $user->id;
+            $log->is_new = true;
 
         } else {
             $log = Log::find($id);
@@ -75,17 +71,6 @@ class LogController extends Controller
 
         return Feedback::getFeedback(0);
     }
-
-//    public static function createNewLog($parameters)
-//    {
-//        $log = new Log;
-//        $log->to = $parameters['to'];
-//        $log->from = $parameters['from'];
-//        $log->title = $parameters['title'];
-//        $log->what = $parameters['what'];
-//        $log->is_new = $parameters['is_new'];
-//        $log->save();
-//    }
 
     public function delete(Request $request)
     {
