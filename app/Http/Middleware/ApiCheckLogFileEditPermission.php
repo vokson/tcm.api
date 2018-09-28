@@ -24,7 +24,7 @@ class ApiCheckLogFileEditPermission
         $role = $user->role;
 
         // Ограничиваем загрузку и удаление файлов Log для не собственников записей в случае, если role = engineer
-        if ($role == 'engineer') {
+        if ($role == 'engineer' && Input::has('log_id')) {
 
             $log = Log::find(Input::get('log_id'));
 

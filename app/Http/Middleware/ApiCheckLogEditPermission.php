@@ -27,7 +27,8 @@ class ApiCheckLogEditPermission
         // Ограничиваем редактирование записей Log для не собственников записей
         // в случае, если role = engineer
 
-        if ($role == 'engineer') {
+        if ($role == 'engineer' && Input::has('id')) {
+
             $log = Log::find(Input::get('id'));
 
             if (is_null($log)) {
