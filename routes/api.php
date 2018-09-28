@@ -56,20 +56,26 @@ Route::middleware(['cors'])->group(function () {
             Route::post('/logs/new/message/switch', 'LogNewMessageController@set');
         });
 
+        Route::post('/logs/new/message/count', 'LogNewMessageController@count');
+
+        // STATUS
         Route::post('/statuses/get', 'StatusController@get');
         Route::post('/statuses/set', 'StatusController@set');
         Route::post('/statuses/delete', 'StatusController@delete');
         Route::post('/statuses/add', 'StatusController@add');
 
+        // TITLE
         Route::post('/titles/get', 'TitleController@get');
         Route::post('/titles/set', 'TitleController@set');
         Route::post('/titles/delete', 'TitleController@delete');
 
+        // USER
         Route::post('/users/get', 'UserController@get');
         Route::post('/users/set', 'UserController@set');
         Route::post('/users/set/default/password', 'UserController@setDefaultPassword');
         Route::post('/users/delete', 'UserController@delete');
 
+        // DATABASE
         Route::post('/service/database/backup', 'ServiceController@getDatabaseBackup');
 
     });

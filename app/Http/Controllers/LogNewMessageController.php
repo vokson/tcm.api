@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Log;
 use App\Http\Controllers\FeedbackController as Feedback;
+use App\ApiUser;
+use Illuminate\Support\Facades\DB;
 
 class LogNewMessageController extends Controller
 {
@@ -23,5 +25,21 @@ class LogNewMessageController extends Controller
         $log->save();
 
         return Feedback::getFeedback(0);
+    }
+
+    public function count(Request $request)
+    {
+        $token = $request->input('access_token');
+        $user = ApiUser::where('access_token', $token)->first();
+
+        $items = DB::table('logs')
+            ->where('is_new', '=', true)
+            ->where('to', '=', $user->id)
+            ->get();
+
+        return Feedback::getFeedback(0, [
+            'count' => $items->count()
+        ]);
+
     }
 }
