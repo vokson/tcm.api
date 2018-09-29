@@ -227,7 +227,7 @@ class LogController extends Controller
         $items = DB::table('logs')
             ->select(['id', 'is_new', 'what', 'to', 'from', 'title', 'created_at as date'])
             ->take(Settings::take('COUNT_OF_NEW_LOGS'))
-            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
         // Подменяем id на значения полей из других таблиц
