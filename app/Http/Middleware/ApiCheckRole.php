@@ -2,12 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use App\UploadedFile;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
 use App\ApiUser;
-use Illuminate\Support\Facades\Input;
-use App\Log;
 
 class ApiCheckRole
 {
@@ -28,6 +25,9 @@ class ApiCheckRole
             "api/logs/file/download",
             "api/logs/file/get",
             "api/logs/file/delete",
+            "api/logs/new/message/switch",
+            "api/logs/new/message/count",
+            "api/logs/get/last/articles",
         ];
 
         $group_leader = [];
@@ -73,72 +73,6 @@ class ApiCheckRole
 
         if (!in_array($request->path(), $permittedUrls)) {
             return Feedback::getFeedback(104);
-        }
-
-        // Ограничиваем редактирование записей Log для не собственников записей
-        // в случае, если role = engineer
-        if (
-            $role == 'engineer' &&
-            Input::has('id') &&
-            (
-                $request->path() == "api/logs/set" ||
-                $request->path() == "api/logs/delete"
-            )
-        ) {
-            $log = Log::find(Input::get('id'));
-
-            if (is_null($log)) {
-                return Feedback::getFeedback(104);
-            }
-
-            if ($log->owner != $user->id) {
-                return Feedback::getFeedback(104);
-            }
-        }
-
-        // Ограничиваем загрузку файлов Log для не собственников записей в случае, если role = engineer
-        if (
-            $role == 'engineer' &&
-            Input::has('log_id') &&
-            (
-                $request->path() == "api/logs/file/upload"
-            )
-        ) {
-            $log = Log::find(Input::get('log_id'));
-
-            if (is_null($log)) {
-                return Feedback::getFeedback(104, [
-                    'uin' => Input::get('uin', '')
-                ]);
-            }
-
-            if ($log->owner != $user->id) {
-                return Feedback::getFeedback(104, [
-                    'uin' => Input::get('uin', '')
-                ]);
-            }
-        }
-
-        // Ограничиваем удаление файлов Log для не собственников записей в случае, если role = engineer
-
-        if (
-            $role == 'engineer' &&
-            Input::has('id') &&
-            (
-                $request->path() == "api/logs/file/delete"
-            )
-        ) {
-            $file = UploadedFile::find(Input::get('id'));
-
-            if (is_null($file)) {
-                return Feedback::getFeedback(104);
-            }
-
-            $log = Log::find($file->log);
-
-            if ($log->owner != $user->id) {
-                return Feedback::getFeedback(104);
-            }
         }
 
         return $next($request);

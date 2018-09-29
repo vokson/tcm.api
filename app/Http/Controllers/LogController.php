@@ -10,6 +10,7 @@ use App\Http\Controllers\FeedbackController as Feedback;
 use App\Title;
 use Illuminate\Support\Facades\DB;
 use DateTime;
+use App\Http\Controllers\SettingsController as Settings;
 
 class LogController extends Controller
 {
@@ -31,7 +32,6 @@ class LogController extends Controller
             return Feedback::getFeedback(306);
         }
 
-
         $id = null;
         if (Input::has('id')) {
 
@@ -49,7 +49,8 @@ class LogController extends Controller
             $token = $request->input('access_token');
             $user = ApiUser::where('access_token', $token)->first();
 
-            $log->owner =  $user->id;
+            $log->owner = $user->id;
+            $log->is_new = true;
 
         } else {
             $log = Log::find($id);
@@ -58,7 +59,9 @@ class LogController extends Controller
         $log->to = $request->input('to');
         $log->from = $request->input('from');
         $log->title = $request->input('title');
+//        $log->is_new = $request->input('is_new');
         $log->created_at = $request->input('date');
+
 
         $log->what = trim($request->input('what'));
         if ($log->what == "") {
@@ -68,16 +71,6 @@ class LogController extends Controller
         $log->save();
 
         return Feedback::getFeedback(0);
-    }
-
-    public static function createNewLog($parameters)
-    {
-        $log = new Log;
-        $log->to = $parameters['to'];
-        $log->from = $parameters['from'];
-        $log->title = $parameters['title'];
-        $log->what = $parameters['what'];
-        $log->save();
     }
 
     public function delete(Request $request)
@@ -106,6 +99,8 @@ class LogController extends Controller
         $what = trim(Input::get('what', ''));
         $timestamp = trim(Input::get('date', ''));
         $isOnlyLast = trim(Input::get('is_only_last', false));
+        $isNewMessageSearch = Input::has('is_new');
+        $is_new = (bool)Input::get('is_new', false);
 
         //DATE
         $dayStartDate = 1;
@@ -116,56 +111,10 @@ class LogController extends Controller
             $dayEndDate = DateTime::createFromFormat('U', $timestamp)->setTime(23, 59, 59)->format('U');
         }
 
-        // TO
 
-        $usersTo = DB::table('api_users')
-            ->where('surname', 'like', '%' . $to . '%')
-            ->select('id', 'name', 'surname')
-            ->get();
-
-        $idUsersTo = $usersTo->map(function ($item) {
-            return $item->id;
-        });
-
-        $namesUsersTo = $usersTo->map(function ($item) {
-            return $item->surname . ' ' . $item->name;
-        });
-
-        $idNamesUsersTo = array_combine($idUsersTo->toArray(), $namesUsersTo->toArray());
-
-        //FROM
-
-        $usersFrom = DB::table('api_users')
-            ->where('surname', 'like', '%' . $from . '%')
-            ->select('id', 'name', 'surname')
-            ->get();
-
-        $idUsersFrom = $usersFrom->map(function ($item) {
-            return $item->id;
-        });
-
-        $namesUsersFrom = $usersFrom->map(function ($item) {
-            return $item->surname . ' ' . $item->name;
-        });
-
-        $idNamesUsersFrom = array_combine($idUsersFrom->toArray(), $namesUsersFrom->toArray());
-
-        //TITLE
-
-        $titles = DB::table('titles')
-            ->where('name', 'like', '%' . $title . '%')
-            ->select('id', 'name')
-            ->get();
-
-        $idTitles = $titles->map(function ($item) {
-            return $item->id;
-        });
-
-        $namesTitles = $titles->map(function ($item) {
-            return $item->name;
-        });
-
-        $idNamesTitles = array_combine($idTitles->toArray(), $namesTitles->toArray());
+        [$idUsersTo, $idNamesUsersTo] = $this->getNamesUsersTo($to); // TO
+        [$idUsersFrom, $idNamesUsersFrom] =  $this->getNamesUsersFrom($from);  //FROM
+        [$idTitles, $idNamesTitles] = $this->getNamesTitles($title); //TITLE
 
 
         $query = DB::table('logs')
@@ -175,13 +124,23 @@ class LogController extends Controller
             ->whereIn('from', $idUsersFrom)
             ->whereIn('title', $idTitles);
 
+        if ($isNewMessageSearch == true) {
+
+            $token = $request->input('access_token');
+            $user = ApiUser::where('access_token', $token)->first();
+
+
+            $query->where('is_new', '=', $is_new)
+                ->where('to', '=', $user->id);
+        }
+
         if ($isOnlyLast == true) {
             $query
-                ->select(DB::raw('"id", "what", "to", "from", "title", max("created_at") as "date"'))
+                ->select(DB::raw('"id", "is_new", "what", "to", "from", "title", max("created_at") as "date"'))
                 ->groupBy('title');
 
         } else {
-            $query->select(['id', 'what', 'to', 'from', 'title', 'created_at as date']);
+            $query->select(['id', 'is_new', 'what', 'to', 'from', 'title', 'created_at as date']);
         }
 
         $items = $query
@@ -198,6 +157,86 @@ class LogController extends Controller
             return $item;
         });
 
+
+        return Feedback::getFeedback(0, [
+            'items' => $items->toArray(),
+        ]);
+
+    }
+
+    private function getNamesUsersTo($to)
+    {
+        $usersTo = DB::table('api_users')
+            ->where('surname', 'like', '%' . $to . '%')
+            ->select('id', 'name', 'surname')
+            ->get();
+
+        $idUsersTo = $usersTo->map(function ($item) {
+            return $item->id;
+        });
+
+        $namesUsersTo = $usersTo->map(function ($item) {
+            return $item->surname . ' ' . $item->name;
+        });
+
+        return [$idUsersTo, array_combine($idUsersTo->toArray(), $namesUsersTo->toArray())];
+    }
+
+    private function getNamesUsersFrom($from) {
+        $usersFrom = DB::table('api_users')
+            ->where('surname', 'like', '%' . $from . '%')
+            ->select('id', 'name', 'surname')
+            ->get();
+
+        $idUsersFrom = $usersFrom->map(function ($item) {
+            return $item->id;
+        });
+
+        $namesUsersFrom = $usersFrom->map(function ($item) {
+            return $item->surname . ' ' . $item->name;
+        });
+
+        return [$idUsersFrom, array_combine($idUsersFrom->toArray(), $namesUsersFrom->toArray())];
+    }
+
+    private function getNamesTitles($title) {
+
+        $titles = DB::table('titles')
+            ->where('name', 'like', '%' . $title . '%')
+            ->select('id', 'name')
+            ->get();
+
+        $idTitles = $titles->map(function ($item) {
+            return $item->id;
+        });
+
+        $namesTitles = $titles->map(function ($item) {
+            return $item->name;
+        });
+
+        return [ $idTitles, array_combine($idTitles->toArray(), $namesTitles->toArray())];
+    }
+
+    public function getLatestArticles(Request $request)
+    {
+
+        list( ,$idNamesUsersTo) = $this->getNamesUsersTo(""); // TO
+        list(, $idNamesUsersFrom) =  $this->getNamesUsersFrom("");  //FROM
+        list(, $idNamesTitles) = $this->getNamesTitles(""); //TITLE
+
+        $items = DB::table('logs')
+            ->select(['id', 'is_new', 'what', 'to', 'from', 'title', 'created_at as date'])
+            ->take(Settings::take('COUNT_OF_NEW_LOGS'))
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Подменяем id на значения полей из других таблиц
+        $items->transform(function ($item, $key) use ($idNamesUsersTo, $idNamesUsersFrom, $idNamesTitles) {
+            $item->to = $idNamesUsersTo[$item->to];
+            $item->from = $idNamesUsersFrom[$item->from];
+            $item->title = $idNamesTitles[$item->title];
+            return $item;
+        });
 
         return Feedback::getFeedback(0, [
             'items' => $items->toArray(),

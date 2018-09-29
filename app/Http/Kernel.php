@@ -63,5 +63,8 @@ class Kernel extends HttpKernel
         'auth.api.token' => \App\Http\Middleware\ApiAccessToken::class,
         'auth.api.roles' => \App\Http\Middleware\ApiCheckRole::class,
         'cors' => \Barryvdh\Cors\HandleCors::class,
+        'auth.log.edit' => \App\Http\Middleware\ApiCheckLogEditPermission::class,
+        'auth.log.file.edit' => \App\Http\Middleware\ApiCheckLogFileEditPermission::class,
+        'auth.log.new.message' => \App\Http\Middleware\ApiCheckLogMarkNewMessagePermission::class,
     ];
 }
