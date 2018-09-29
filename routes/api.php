@@ -36,6 +36,7 @@ Route::middleware(['cors'])->group(function () {
 
         // LOG
         Route::post('/logs/get', 'LogController@get');
+        Route::post('/logs/get/last/articles', 'LogController@getLatestArticles');
 
         Route::middleware(['auth.log.edit'])->group(function () {
             Route::post('/logs/set', 'LogController@set');

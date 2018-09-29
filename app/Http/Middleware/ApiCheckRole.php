@@ -27,6 +27,7 @@ class ApiCheckRole
             "api/logs/file/delete",
             "api/logs/new/message/switch",
             "api/logs/new/message/count",
+            "api/logs/get/last/articles",
         ];
 
         $group_leader = [];
