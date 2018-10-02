@@ -44,7 +44,8 @@ class FeedbackController extends Controller
         603 => 'File can not be deleted',
         604 => 'Wrong input Id',
         605 => 'Wrong input Uin',
-        606 => 'Error of file storage'
+        606 => 'Error of file storage',
+        607 => 'File can not be saved'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

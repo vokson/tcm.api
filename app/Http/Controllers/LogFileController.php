@@ -38,11 +38,20 @@ class LogFileController extends Controller
             return Feedback::getFeedback(605);
         }
 
-        $path = Storage::putFile(
-            'log_file_storage' . DIRECTORY_SEPARATOR . 'FILES' . DIRECTORY_SEPARATOR .
-            $this->createFolderByNumber($log_id) . DIRECTORY_SEPARATOR . $log_id,
-            $request->file('log_file')
-        );
+        try {
+
+            $path = Storage::putFile(
+                'log_file_storage' . DIRECTORY_SEPARATOR . 'FILES' . DIRECTORY_SEPARATOR .
+                $this->createFolderByNumber($log_id) . DIRECTORY_SEPARATOR . $log_id,
+                $request->file('log_file')
+            );
+
+        } catch (QueryException $e) {
+
+            return Feedback::getFeedback(607);
+        }
+
+
 
         if ($path === false) {
             return Feedback::getFeedback(606);
