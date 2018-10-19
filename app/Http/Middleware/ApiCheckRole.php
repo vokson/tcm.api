@@ -30,11 +30,13 @@ class ApiCheckRole
             "api/logs/get/last/articles",
         ];
 
-        $group_leader = [];
-
-        $pm = [
+        $group_leader = [
             "api/titles/set",
             "api/titles/delete",
+        ];
+
+        $pm = [
+
         ];
 
         $admin = [
