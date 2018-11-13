@@ -30,6 +30,7 @@ class ServiceController extends Controller
         $files = UploadedFile::all();
 
         foreach ($files as $file) {
+            var_dump($file->log);
             $log = Log::find($file->log);
             $log->is_attachment_exist = 1;
             $log->save();
