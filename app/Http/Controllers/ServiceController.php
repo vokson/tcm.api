@@ -31,7 +31,7 @@ class ServiceController extends Controller
 
         foreach ($files as $file) {
             $log = Log::find($file->log);
-            $log->is_attachment_exist = true;
+            $log->is_attachment_exist = 1;
             $log->save();
         }
 
