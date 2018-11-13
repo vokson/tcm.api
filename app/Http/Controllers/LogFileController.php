@@ -52,7 +52,6 @@ class LogFileController extends Controller
         }
 
 
-
         if ($path === false) {
             return Feedback::getFeedback(606);
         }
@@ -64,6 +63,11 @@ class LogFileController extends Controller
         $file->server_name = $path;
         $file->uin = $request->input('uin');
         $file->save();
+
+        // Изменяем is_attachment_exist для записи
+        $log = Log::find($log_id);
+        $log->is_attachment_exist = true;
+        $log->save();
 
         return Feedback::getFeedback(0, [
             'id' => $file->id,
@@ -129,10 +133,19 @@ class LogFileController extends Controller
             return Feedback::getFeedback(603);
         }
 
-//        $log_id = $file->log;
         $uin = $file->uin;
+        $log_id = $file->log;
 
+        // Удаляем файл
         $file->delete();
+
+        // Проверяем есть ли еще файлы у данной записи
+        // Если нет, изменяем is_attachment_exist для записи
+        if (UploadedFile::where('log', $log_id)->count() <= 0) {
+            $log = Log::find($log_id);
+            $log->is_attachment_exist = false;
+            $log->save();
+        }
 
         return Feedback::getFeedback(0, [
 //            'log_id' => $log_id,

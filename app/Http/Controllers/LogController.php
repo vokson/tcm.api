@@ -136,11 +136,11 @@ class LogController extends Controller
 
         if ($isOnlyLast == true) {
             $query
-                ->select(DB::raw('"id", "is_new", "what", "to", "from", "title", max("created_at") as "date"'))
+                ->select(DB::raw('"id", "is_new", "is_attachment_exist", "what", "to", "from", "title", max("created_at") as "date"'))
                 ->groupBy('title');
 
         } else {
-            $query->select(['id', 'is_new', 'what', 'to', 'from', 'title', 'created_at as date']);
+            $query->select(['id', 'is_new',  "is_attachment_exist", 'what', 'to', 'from', 'title', 'created_at as date']);
         }
 
         $items = $query
