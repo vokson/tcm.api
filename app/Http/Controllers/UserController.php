@@ -20,6 +20,7 @@ class UserController extends Controller
         $name = trim(Input::get('name', ''));
         $role = trim(Input::get('role', ''));
         $active = trim(Input::get('active', ''));
+        $permission_expression = trim(Input::get('permission_expression', ''));
 
         if (!is_null($id)) {
             if (!ApiUser::where('id', '=', $id)->exists()) {
@@ -55,11 +56,16 @@ class UserController extends Controller
             return Feedback::getFeedback(506);
         }
 
+        if ($permission_expression == "") {
+            return Feedback::getFeedback(507);
+        }
+
         $user->email = $email;
         $user->surname = $surname;
         $user->name = $name;
         $user->role = $role;
         $user->active = $active;
+        $user->permission_expression = $permission_expression;
         $user->save();
 
         return Feedback::getFeedback(0);
@@ -118,7 +124,7 @@ class UserController extends Controller
             ->where('name', 'like', '%' . $name . '%')
             ->where('role', 'like', '%' . $role . '%')
             ->where('active', 'like', '%' . $active . '%')
-            ->select(['id', 'name', 'surname', 'email', 'role', 'active'])
+            ->select(['id', 'name', 'surname', 'email', 'role', 'active', 'permission_expression'])
             ->orderBy('surname', 'asc')
             ->orderBy('name', 'asc')
             ->get();
