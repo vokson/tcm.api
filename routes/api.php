@@ -38,7 +38,7 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/logs/get', 'LogController@get');
         Route::post('/logs/get/last/articles', 'LogController@getLatestArticles');
 
-        Route::middleware(['auth.log.edit'])->group(function () {
+        Route::middleware(['auth.log.edit', 'reg_exp.log.edit'])->group(function () {
             Route::post('/logs/set', 'LogController@set');
             Route::post('/logs/delete', 'LogController@delete');
         });
@@ -47,7 +47,7 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/logs/file/get', 'LogFileController@get');
         Route::post('/logs/file/download', 'LogFileController@download');
 
-        Route::middleware(['auth.log.file.edit'])->group(function () {
+        Route::middleware(['auth.log.file.edit', 'reg_exp.log.file.edit'])->group(function () {
             Route::post('/logs/file/upload', 'LogFileController@upload');
             Route::post('/logs/file/delete', 'LogFileController@delete');
         });

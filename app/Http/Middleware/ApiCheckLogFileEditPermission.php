@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\UploadedFile;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
 use App\ApiUser;
@@ -24,9 +25,15 @@ class ApiCheckLogFileEditPermission
         $role = $user->role;
 
         // Ограничиваем загрузку и удаление файлов Log для не собственников записей в случае, если role = engineer
-        if ($role == 'engineer' && Input::has('log_id')) {
+        if ($role == 'engineer') {
 
-            $log = Log::find(Input::get('log_id'));
+            if (Input::has('log_id')) { // если загрузка файла
+                $log = Log::find(Input::get('log_id'));
+
+            } else { // если удаление файла
+                $file = UploadedFile::find(Input::get('id'));
+                $log = Log::find($file->log);
+            }
 
             if (is_null($log)) {
                 return Feedback::getFeedback(104, [
@@ -39,6 +46,8 @@ class ApiCheckLogFileEditPermission
                     'uin' => Input::get('uin', '')
                 ]);
             }
+
+
         }
 
         return $next($request);

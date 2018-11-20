@@ -11,6 +11,7 @@ class FeedbackController extends Controller
         103 => 'Invalid token',
         104 => 'Permission denied',
         105 => 'Wrong new password',
+        106 => 'Can not pass regular expression middleware',
         // Admin
         201 => 'Wrong setting name',
         202 => 'Wrong setting value',
@@ -38,6 +39,7 @@ class FeedbackController extends Controller
         504 => 'Wrong input Name',
         505 => 'Wrong input Role',
         506 => 'Wrong input Active',
+        507 => 'Wrong input Permission Expression',
         //File
         601 => 'File is missed',
         602 => 'Badly uploaded',
