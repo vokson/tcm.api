@@ -27,6 +27,7 @@ class FeedbackController extends Controller
         305 => 'Wrong input Id',
         306 => 'Wrong input Date',
         307 => 'Wrong input Is New',
+        308 => 'Can not delete article because of attached files',
         //Title
         401 => 'Wrong input Id',
         402 => 'Wrong input Name',

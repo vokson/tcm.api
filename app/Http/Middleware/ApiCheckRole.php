@@ -49,7 +49,8 @@ class ApiCheckRole
             "api/users/set/default/password",
             "api/users/delete",
             'api/service/database/backup',
-            'api/service/database/update/attachments'
+            'api/service/database/update/attachments',
+            'api/logs/clean/files/without/articles'
         ];
 
         $this->permissions = [

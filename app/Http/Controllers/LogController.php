@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\UploadedFile;
 use Illuminate\Http\Request;
 use App\ApiUser;
 use App\Log;
@@ -85,7 +86,14 @@ class LogController extends Controller
         }
 
         $log = Log::find($request->input('id'));
-        $log->delete();
+
+        if (UploadedFile::where('log', '=', $log->id)->exists()) {
+
+            return Feedback::getFeedback(308);
+
+        } else {
+            $log->delete();
+        }
 
         return Feedback::getFeedback(0);
     }
