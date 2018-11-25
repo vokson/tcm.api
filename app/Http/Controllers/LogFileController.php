@@ -176,4 +176,20 @@ class LogFileController extends Controller
         return response()->download(storage_path("app/" . $file->server_name), "", $headers);
     }
 
+    public function clean()
+    {
+        $files = UploadedFile::all();
+
+        foreach ($files as $file) {
+
+            if (!Log::where('id', '=', $file->log)->exists()) {
+                Storage::delete($file->server_name);
+                $file->delete();
+            }
+
+        }
+
+        return Feedback::getFeedback();
+    }
+
 }
