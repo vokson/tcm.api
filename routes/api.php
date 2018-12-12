@@ -81,6 +81,9 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/service/database/backup', 'ServiceController@getDatabaseBackup');
         Route::post('/service/database/update/attachments', 'ServiceController@updateAttachmentStatuses');
 
+        // STATISTIC
+        Route::post('/charts/logs/created/get', 'StatisticController@getItemsForLogChart');
+
     });
 
 });

@@ -207,7 +207,7 @@ class LogController extends Controller
         return [$idUsersFrom, array_combine($idUsersFrom->toArray(), $namesUsersFrom->toArray())];
     }
 
-    private function getNamesTitles($title) {
+    public function getNamesTitles($title) {
 
         $titles = DB::table('titles')
             ->where('name', 'like', '%' . $title . '%')
