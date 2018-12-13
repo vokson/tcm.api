@@ -52,55 +52,53 @@ class StatisticController extends Controller
 
         }
 
-        $s = [];
-        $s[] = "START_DATE = " . $startDate;
-        $s[] = "END_DATE = " . $endDate;
+//        $s = [];
+//        $s[] = "START_DATE = " . $startDate;
+//        $s[] = "END_DATE = " . $endDate;
 
-        $date = intval($startDate);
+        $countOfIntervals = intdiv(intval($endDate) - intval($startDate), $interval);
         $count = 0;
-        $chartItems = [];
-        foreach ($items as $item) {
-            $s[] = "ITEM = " . $item->created_at;
-            if ($item->created_at >= ($date + $interval)) {
-                $chartItems[$date] = $count;
-                $s[] = "DATE = " . $date . "   COUNT = " . $count;
-                $count = 0;
-                $date += $interval;
-            } else {
+        $i = 0;
+        $labels = [];
+        $values = [];
+
+        for ($n = 1; $n <= $countOfIntervals; $n++) {
+
+//            if ($i < count($items)) {
+//                $s[] = "COUNT=" . count($items) . "  I=" . $i . "  ITEM = " . $items[$i]->created_at;
+//            }
+
+            while (
+                ($i < count($items)) &&
+                ($items[$i]->created_at < (intval($startDate) + $n * $interval))
+            ) {
                 $count++;
+                $i++;
             }
+
+            $labels[] = intval($startDate) + ($n - 1) * $interval;
+            $values[] = $count;
+//            $chartItems[intval($startDate) + ($n - 1) * $interval] = $count;
+//            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . $count;
+            $count = 0;
+
         }
 
-        $s[] = "EXIT";
-        $s[] = "COUNT = " . $count;
-        $s[] = "SUM OF CHART ITEMS = " . array_sum($chartItems);
-        $s[] = "TOTAL COUNT = " . count($items);
-
-
-        // Если эл-ты закончились, но дата не достигла endDate
-        if ($date < intval($endDate)) {
-            $chartItems[$date] = 0;
+        if (intval($startDate) + $n * $interval < intval($endDate)) {
+            $labels[] = intval($startDate) + $n * $interval;
+            $values[] = $count-$i;
+//            $chartItems[intval($startDate) + $n * $interval] = $count - $i;
         }
 
-        // Если эл-ты закончились и дата = endDate, ничего делать не нужно. Все четко сошлось.
+//        $s[] = "ARRAY_SUM = " . array_sum($chartItems);
 
-        // Если эл-ты закончились, но дата больше, чем endDate
-        if ($date > intval($endDate)) {
-            $chartItems[$date] = $count;
-        }
+//        return $s;
 
-        $s[] = "SUM OF CHART ITEMS = " . array_sum($chartItems);
-
-        return $s;
-
-        if (array_sum($chartItems) <> count($items)) {
-            return "DATE = " . $date . "END_DATE=" . intval($endDate) . "  " . array_sum($chartItems) . "<>" . count($items);
-        }
-
-
+        $arr['labels'] = $labels;
+        $arr['values'] = $values;
 
         return Feedback::getFeedback(0, [
-            'items' => $chartItems
+            'items' => $arr
         ]);
 
     }
