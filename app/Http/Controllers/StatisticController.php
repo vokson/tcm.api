@@ -52,11 +52,13 @@ class StatisticController extends Controller
 
         }
 
-//        $s = [];
-//        $s[] = "START_DATE = " . $startDate;
-//        $s[] = "END_DATE = " . $endDate;
+        $s = [];
+        $s[] = "START_DATE = " . $startDate;
+        $s[] = "END_DATE = " . $endDate;
+        $s[] = "INTERVAL = " . $interval;
 
         $countOfIntervals = intdiv(intval($endDate) - intval($startDate), $interval);
+        $s[] = "COUNT OF INTERVALS = " . $countOfIntervals;
         $count = 0;
         $i = 0;
         $labels = [];
@@ -64,9 +66,9 @@ class StatisticController extends Controller
 
         for ($n = 1; $n <= $countOfIntervals; $n++) {
 
-//            if ($i < count($items)) {
-//                $s[] = "COUNT=" . count($items) . "  I=" . $i . "  ITEM = " . $items[$i]->created_at;
-//            }
+            if ($i < count($items)) {
+                $s[] = "COUNT=" . count($items) . "  I=" . $i . "  ITEM = " . $items[$i]->created_at;
+            }
 
             while (
                 ($i < count($items)) &&
@@ -78,19 +80,23 @@ class StatisticController extends Controller
 
             $labels[] = intval($startDate) + ($n - 1) * $interval;
             $values[] = $count;
-//            $chartItems[intval($startDate) + ($n - 1) * $interval] = $count;
-//            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . $count;
+            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . $count;
             $count = 0;
 
         }
 
-        if (intval($startDate) + $n * $interval < intval($endDate)) {
-            $labels[] = intval($startDate) + $n * $interval;
-            $values[] = $count-$i;
-//            $chartItems[intval($startDate) + $n * $interval] = $count - $i;
+        // n выходит из цикла увеличенным на 1
+
+        $s[] = "N = " . $n;
+
+        if ((intval($startDate) + ($n - 1) * $interval) < intval($endDate)) {
+            $s[] = "INSIDE";
+            $labels[] = intval($startDate) + ($n - 1) * $interval;
+            $values[] = count($items) - $i;
+            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . (count($items) - $i);
         }
 
-//        $s[] = "ARRAY_SUM = " . array_sum($chartItems);
+        $s[] = "ARRAY_SUM = " . array_sum($values);
 
 //        return $s;
 
