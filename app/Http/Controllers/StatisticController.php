@@ -42,23 +42,24 @@ class StatisticController extends Controller
 
         $items = $items->toArray();
 
-//        return var_dump($items);
+
 
         // Удаляем все титулы, не подходящие под регулярное выражение.
         foreach ($items as $key => $value) {
             if (preg_match($reg_exp, $value->title) != 1) {
                 unset ($items[$key]);
             }
-
         }
 
-        $s = [];
-        $s[] = "START_DATE = " . $startDate;
-        $s[] = "END_DATE = " . $endDate;
-        $s[] = "INTERVAL = " . $interval;
+        $items = array_values($items);
+
+//        $s = [];
+//        $s[] = "START_DATE = " . $startDate;
+//        $s[] = "END_DATE = " . $endDate;
+//        $s[] = "INTERVAL = " . $interval;
 
         $countOfIntervals = intdiv(intval($endDate) - intval($startDate), $interval);
-        $s[] = "COUNT OF INTERVALS = " . $countOfIntervals;
+//        $s[] = "COUNT OF INTERVALS = " . $countOfIntervals;
         $count = 0;
         $i = 0;
         $labels = [];
@@ -66,9 +67,9 @@ class StatisticController extends Controller
 
         for ($n = 1; $n <= $countOfIntervals; $n++) {
 
-            if ($i < count($items)) {
-                $s[] = "COUNT=" . count($items) . "  I=" . $i . "  ITEM = " . $items[$i]->created_at;
-            }
+//            if ($i < count($items)) {
+//                $s[] = "COUNT=" . count($items) . "  I=" . $i . "  ITEM = " . $items[$i]->created_at;
+//            }
 
             while (
                 ($i < count($items)) &&
@@ -80,23 +81,23 @@ class StatisticController extends Controller
 
             $labels[] = intval($startDate) + ($n - 1) * $interval;
             $values[] = $count;
-            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . $count;
+//            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . $count;
             $count = 0;
 
         }
 
         // n выходит из цикла увеличенным на 1
 
-        $s[] = "N = " . $n;
+//        $s[] = "N = " . $n;
 
         if ((intval($startDate) + ($n - 1) * $interval) < intval($endDate)) {
-            $s[] = "INSIDE";
+//            $s[] = "INSIDE";
             $labels[] = intval($startDate) + ($n - 1) * $interval;
             $values[] = count($items) - $i;
-            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . (count($items) - $i);
+//            $s[] = "DATE = " . (intval($startDate) + ($n - 1) * $interval) . "   COUNT = " . (count($items) - $i);
         }
 
-        $s[] = "ARRAY_SUM = " . array_sum($values);
+//        $s[] = "ARRAY_SUM = " . array_sum($values);
 
 //        return $s;
 
