@@ -33,6 +33,7 @@ class FeedbackController extends Controller
         402 => 'Wrong input Name',
         403 => 'Wrong input Status',
         404 => 'Wrong input Predecessor',
+        405 => 'Save error',
         //User
         501 => 'Wrong input Id',
         502 => 'Wrong input E-mail',

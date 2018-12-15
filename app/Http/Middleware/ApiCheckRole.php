@@ -19,6 +19,7 @@ class ApiCheckRole
             "api/logs/set",
             "api/logs/delete",
             "api/titles/get",
+            "api/titles/history/get",
             "api/users/get",
             "api/statuses/get",
             "api/logs/file/upload",

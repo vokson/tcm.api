@@ -12,6 +12,12 @@ use App\Http\Controllers\SettingsController As Settings;
 
 class UserController extends Controller
 {
+    public static function getUserId(Request $request) {
+        $token = $request->input('access_token');
+        $user = ApiUser::where('access_token', $token)->first();
+        return $user->id;
+    }
+
     public function set()
     {
         $id = Input::get('id', null);
