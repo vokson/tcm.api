@@ -66,4 +66,7 @@ return [
 
     ],
 
+    /* Directory where zip archives are stored */
+    'archiveStoragePath' => storage_path('app/public/zip'),
+
 ];
