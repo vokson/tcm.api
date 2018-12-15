@@ -9,6 +9,8 @@ use App\Log;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use ZipArchive;
+use App\Http\Controllers\SettingsController as Settings;
 
 class LogFileController extends Controller
 {
@@ -176,6 +178,38 @@ class LogFileController extends Controller
         return response()->download(storage_path("app/" . $file->server_name), "", $headers);
     }
 
+    public function downloadAll(Request $request)
+    {
+        $this->cleanOldArchives();
+
+        $log_id = intval(Input::get('id', 0));
+        $files = UploadedFile::where('log', $log_id)->get();
+
+        $fileForZipArchive = [];
+        foreach ($files as $file) {
+            $fileForZipArchive[] = [
+                'absolute_path' => storage_path("app/" . $file->server_name),
+                'filename' => $file->original_name
+            ];
+        }
+
+        $archiveName =  uniqid() . '.zip';
+
+        $zipPath = config('filesystems.archiveStoragePath') . DIRECTORY_SEPARATOR . $archiveName;
+
+        if ($this->createArchive($fileForZipArchive, $zipPath) === FALSE) {
+            return Feedback::getFeedback(608);
+        }
+
+       $headers = array(
+            'Content-Type' => 'application/octet-stream',
+            'Access-Control-Expose-Headers' => 'Content-Filename',
+            'Content-Filename' => $archiveName
+        );
+
+        return response()->download($zipPath, "", $headers);
+    }
+
     public function clean()
     {
         $files = UploadedFile::all();
@@ -190,6 +224,36 @@ class LogFileController extends Controller
         }
 
         return Feedback::getFeedback();
+    }
+
+    public function createArchive($files, $zipPath)
+    {
+
+        $zip = new ZipArchive();
+
+        if ($zip->open($zipPath, ZIPARCHIVE::CREATE) === TRUE) {
+
+            foreach ($files as $file) {
+                if (file_exists($file['absolute_path'])) {
+                    $zip->addFile($file['absolute_path'], $file['filename']);
+                }
+            }
+
+            if ($zip->numFiles == 0) return FALSE;
+
+            return ($zip->status == ZipArchive::ER_OK);
+        }
+
+        return FALSE;
+    }
+
+    public function cleanOldArchives()
+    {
+        foreach (glob(config('filesystems.archiveStoragePath'). DIRECTORY_SEPARATOR  . '*') as $fileName) {
+            if ( (microtime(true) - filectime($fileName) > Settings::take('ARCHIVE_STORAGE_TIME') )) {
+                unlink($fileName);
+            }
+        }
     }
 
 }

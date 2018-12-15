@@ -46,6 +46,7 @@ Route::middleware(['cors'])->group(function () {
         // LOG FILE
         Route::post('/logs/file/get', 'LogFileController@get');
         Route::post('/logs/file/download', 'LogFileController@download');
+        Route::post('/logs/file/download/all', 'LogFileController@downloadAll');
         Route::post('/logs/clean/files/without/articles', 'LogFileController@clean');
 
         Route::middleware(['auth.log.file.edit', 'reg_exp.log.file.edit'])->group(function () {

@@ -24,6 +24,7 @@ class ApiCheckRole
             "api/statuses/get",
             "api/logs/file/upload",
             "api/logs/file/download",
+            "api/logs/file/download/all",
             "api/logs/file/get",
             "api/logs/file/delete",
             "api/logs/new/message/switch",
