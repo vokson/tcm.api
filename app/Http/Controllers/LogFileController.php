@@ -197,6 +197,8 @@ class LogFileController extends Controller
 
         $zipPath = config('filesystems.archiveStoragePath') . DIRECTORY_SEPARATOR . $archiveName;
 
+        set_time_limit(Settings::take('ARCHIVE_CREATION_TIME') );
+
         if ($this->createArchive($fileForZipArchive, $zipPath) === FALSE) {
             return Feedback::getFeedback(608);
         }

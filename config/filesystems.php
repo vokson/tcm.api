@@ -69,7 +69,4 @@ return [
     /* Directory where zip archives are stored */
     'archiveStoragePath' => storage_path('app/public/zip'),
 
-    /* Time limit for zip archives creation, sec */
-    'archiveCreationTime' => 300,
-
 ];
