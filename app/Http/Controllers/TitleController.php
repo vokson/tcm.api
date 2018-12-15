@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Status;
+use App\TitleHistoryRecord;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
@@ -60,15 +61,13 @@ class TitleController extends Controller
             return Feedback::getFeedback(402);
         }
 
-        $title->save();
+        try {
+            $title->save();
+        } catch (QueryException $e) {
+            return Feedback::getFeedback(405);
+        }
 
-//        LogController::createNewLog([
-//            'to' => SettingsController::take('SYSTEM_USER_ID'),
-//            'from' => SettingsController::take('SYSTEM_USER_ID'),
-//            'title' => $title->id,
-//            'what' => 'СТАТУС => ' . Status::find($title->status)->name
-//        ]);
-
+        TitleHistoryController::record(UserController::getUserId($request), $title->id);
         return Feedback::getFeedback(0);
     }
 
@@ -162,6 +161,7 @@ class TitleController extends Controller
         }
 
         $title = Title::find($request->input('id'));
+        $id = $title->id;
 
 
         try {
@@ -170,6 +170,7 @@ class TitleController extends Controller
             return Feedback::getFeedback(206);
         }
 
+        TitleHistoryController::titleDeletedRecord(UserController::getUserId($request), $id);
         return Feedback::getFeedback(0);
     }
 }

@@ -70,6 +70,7 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/titles/get', 'TitleController@get');
         Route::post('/titles/set', 'TitleController@set');
         Route::post('/titles/delete', 'TitleController@delete');
+        Route::post('/titles/history/get', 'TitleHistoryController@get');
 
         // USER
         Route::post('/users/get', 'UserController@get');
