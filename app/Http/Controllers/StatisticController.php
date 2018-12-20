@@ -49,41 +49,8 @@ class StatisticController extends Controller
             }
         }
 
-        $items = array_values($items);
-        $countOfIntervals = intdiv(intval($endDate) - intval($startDate), $interval);
-        $count = 0;
-        $i = 0;
-        $labels = [];
-        $values = [];
-
-        for ($n = 1; $n <= $countOfIntervals; $n++) {
-
-            while (
-                ($i < count($items)) &&
-                ($items[$i]->created_at < (intval($startDate) + $n * $interval))
-            ) {
-                $count++;
-                $i++;
-            }
-
-            $labels[] = intval($startDate) + ($n - 1) * $interval;
-            $values[] = $count;
-            $count = 0;
-
-        }
-
-        // n выходит из цикла увеличенным на 1
-
-        if ((intval($startDate) + ($n - 1) * $interval) < intval($endDate)) {
-            $labels[] = intval($startDate) + ($n - 1) * $interval;
-            $values[] = count($items) - $i;
-        }
-
-        $arr['labels'] = $labels;
-        $arr['values'] = $values;
-
         return Feedback::getFeedback(0, [
-            'items' => $arr
+            'items' => $this->divideItemsByInterval($items, $startDate, $endDate, $interval)
         ]);
 
     }
