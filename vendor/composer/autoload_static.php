@@ -392,6 +392,7 @@ class ComposerStaticInit7adfac264e0edefe18a050f416b0578d
         'App\\Setting' => __DIR__ . '/../..' . '/app/Setting.php',
         'App\\Status' => __DIR__ . '/../..' . '/app/Status.php',
         'App\\Title' => __DIR__ . '/../..' . '/app/Title.php',
+        'App\\TitleHistoryRecord' => __DIR__ . '/../..' . '/app/TitleHistoryRecord.php',
         'App\\UploadedFile' => __DIR__ . '/../..' . '/app/UploadedFile.php',
         'App\\User' => __DIR__ . '/../..' . '/app/User.php',
         'Asm89\\Stack\\Cors' => __DIR__ . '/..' . '/asm89/stack-cors/src/Asm89/Stack/Cors.php',
