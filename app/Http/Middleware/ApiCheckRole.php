@@ -32,6 +32,7 @@ class ApiCheckRole
             "api/logs/get/last/articles",
             "api/charts/logs/created/get",
             "api/charts/titles/created/get",
+            "api/checker/file/upload",
         ];
 
         $group_leader = [

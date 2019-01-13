@@ -87,6 +87,9 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/charts/logs/created/get', 'StatisticController@getItemsForLogChart');
         Route::post('/charts/titles/created/get', 'StatisticController@getItemsForTitleChart');
 
+        //CHECKS
+        Route::post('/checker/file/upload', 'CheckedFileController@upload');
+
     });
 
 });
