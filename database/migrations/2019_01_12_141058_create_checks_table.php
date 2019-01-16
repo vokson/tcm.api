@@ -16,13 +16,15 @@ class CreateChecksTable extends Migration
     {
         Schema::create('checks', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('file_id')
+                ->nullable()
+                ->references('id')->on('checked_files')->onDelete('restrict');
             $table->string('filename');
             $table->integer('status');
             $table->integer('mistake_count');
             $table->integer('owner')
                 ->default(SettingsController::take('SYSTEM_USER_ID'))
                 ->references('id')->on('api_users')->onDelete('restrict');
-            $table->boolean('is_attachment_exist')->default(false);
             $table->timestamps();
         });
     }

@@ -15,7 +15,6 @@ class CreateCheckedFileTable extends Migration
     {
         Schema::create('checked_files', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('check_id');
             $table->integer('size');
             $table->string('original_name');
             $table->string('server_name');

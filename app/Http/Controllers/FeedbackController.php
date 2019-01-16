@@ -50,7 +50,8 @@ class FeedbackController extends Controller
         605 => 'Wrong input Uin',
         606 => 'Error of file storage',
         607 => 'File can not be saved',
-        608 => 'Zip archive can not be created'
+        608 => 'Zip archive can not be created',
+        609 => 'Name of file is not correct'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])
