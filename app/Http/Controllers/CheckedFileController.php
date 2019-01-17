@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ApiUser;
+use App\Check;
 use App\CheckedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
@@ -74,14 +75,13 @@ class CheckedFileController extends Controller
             return Feedback::getFeedback(0, [
                 'id' => $file->id,
                 'uin' => $file->uin,
-                'log_id' => $file->log
             ]);
         } else {
             return Feedback::getFeedback($errorCode);
         }
     }
 
-    public static function delete($id)
+    public static function deleteById($id)
     {
         $file = CheckedFile::find($id);
 
@@ -99,6 +99,29 @@ class CheckedFileController extends Controller
         CheckedFile::destroy($id);
 
         return true;
+    }
+
+    public function download(Request $request)
+    {
+        $file_id = null;
+        if (Input::has('id')) {
+
+            if (!CheckedFile::where('id', '=', Input::get('id'))->exists()) {
+                return Feedback::getFeedback(604);
+            } else {
+                $file_id = $request->input('id');
+            }
+        }
+
+        $file = CheckedFile::find($file_id);
+
+        $headers = array(
+            'Content-Type' => 'application/octet-stream',
+            'Access-Control-Expose-Headers' => 'Content-Filename',
+            'Content-Filename' => rawurlencode($file->original_name)
+        );
+
+        return response()->download(storage_path("app/" . $file->server_name), "", $headers);
     }
 
 

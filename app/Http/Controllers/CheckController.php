@@ -48,11 +48,9 @@ class CheckController extends Controller
     {
         $record = Check::where('filename', $nameOfFileWithoutExtension)->latest()->first();
 
-//        return $record;
-
         if (!is_null($record) && $record->status == 0 && $record->owner == $owner_id) {
             // Пользователь хочет подменить файл
-            if (!CheckedFileController::delete($record->file_id)) return 603;
+            if (!CheckedFileController::deleteById($record->file_id)) return 603;
 
             $record->file_id = $file_id;
             $record->save();
@@ -63,6 +61,47 @@ class CheckController extends Controller
             $record->filename = $nameOfFileWithoutExtension;
             $record->status = 0;
             $record->mistake_count = 0;
+            $record->owner = $owner_id;
+            $record->save();
+        }
+
+        return 0;
+
+    }
+
+    public static function addRecordOfCheckedFile($nameOfFileWithoutExtension, $file_id, $owner_id)
+    {
+        //Разделяем имя файла
+        $arr = explode('[', $nameOfFileWithoutExtension);
+
+        $filename = $arr[0];
+        $countOfMistakes = intval(substr($arr[1], 0, -1));
+        $status = ($countOfMistakes === 0) ? 1 : -1;
+
+        // Если согласовано положительно, то удаляем загруженный файл
+        if ($status === 1) {
+            if (!CheckedFileController::deleteById($file_id)) return 603;
+        }
+
+        $record = Check::where('filename', $filename)->latest()->first();
+
+        if (!is_null($record) && $record->status == $status && $record->owner == $owner_id) {
+            // Пользователь хочет подменить файл
+
+            if ($status === -1) {
+                if (!CheckedFileController::deleteById($record->file_id)) return 603;
+                $record->file_id = $file_id;
+                $record->mistake_count = $countOfMistakes;
+                $record->save();
+            }
+
+        } else {
+            // Пользователь загружает файл в первый раз
+            $record = new Check();
+            if ($status === -1) $record->file_id = $file_id;
+            $record->filename = $filename;
+            $record->status = $status;
+            $record->mistake_count = $countOfMistakes;
             $record->owner = $owner_id;
             $record->save();
         }
