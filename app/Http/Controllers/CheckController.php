@@ -4,19 +4,90 @@ namespace App\Http\Controllers;
 
 use App\Check;
 use App\CheckedFile;
-use App\UploadedFile;
 use Illuminate\Http\Request;
-use App\ApiUser;
-use App\Log;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
-use App\Title;
 use Illuminate\Support\Facades\DB;
 use DateTime;
-use App\Http\Controllers\SettingsController as Settings;
 
 class CheckController extends Controller
 {
+
+    public function get(Request $request)
+    {
+
+        $status = trim(Input::get('status', ''));
+        $owner = trim(Input::get('owner', ''));
+        $filename = trim(Input::get('filename', ''));
+        $mistake_count = trim(Input::get('mistake_count', ''));
+        $timestamp = trim(Input::get('date', ''));
+        $isOnlyLast = trim(Input::get('is_only_last', false));
+
+        //DATE
+        $dayStartDate = 1;
+        $dayEndDate = 9999999999;
+
+        if ($timestamp != "") {
+            $dayStartDate = DateTime::createFromFormat('U', $timestamp)->setTime(0, 0, 0)->format('U');
+            $dayEndDate = DateTime::createFromFormat('U', $timestamp)->setTime(23, 59, 59)->format('U');
+        }
+
+
+        [$idUsers, $idNamesUsers] = $this->getNamesUsers($owner);
+
+        $query = DB::table('checks')
+            ->whereBetween('created_at', [$dayStartDate, $dayEndDate])
+            ->where('filename', 'like', '%' . $filename . '%')
+            ->where('status', 'like', '%' . $status . '%')
+            ->where('mistake_count', 'like', '%' . $mistake_count . '%')
+            ->whereIn('owner', $idUsers);
+
+        if ($isOnlyLast == true) {
+            $query
+                ->select(DB::raw('"id", "file_id", "filename", "status", "mistake_count", "owner", max("created_at") as "date"'))
+                ->groupBy('filename');
+
+        } else {
+            $query->select(['id', 'file_id',  "filename", 'status', 'mistake_count', 'owner', 'created_at as date']);
+        }
+
+        $items = $query
+            ->orderBy('date', 'asc')
+            ->get();
+
+
+        // Подменяем id на значения полей из других таблиц
+
+        $items->transform(function ($item, $key) use ($idNamesUsers) {
+            $item->owner = $idNamesUsers[$item->owner];
+            return $item;
+        });
+
+
+        return Feedback::getFeedback(0, [
+            'items' => $items->toArray(),
+        ]);
+
+    }
+
+
+    private function getNamesUsers($userIdPattern)
+    {
+        $users = DB::table('api_users')
+            ->where('surname', 'like', '%' . $userIdPattern . '%')
+            ->select('id', 'name', 'surname')
+            ->get();
+
+        $idUsers = $users->map(function ($item) {
+            return $item->id;
+        });
+
+        $namesUsers = $users->map(function ($item) {
+            return $item->surname . ' ' . $item->name;
+        });
+
+        return [$idUsers, array_combine($idUsers->toArray(), $namesUsers->toArray())];
+    }
 
     public static function validateNameOfNewFile($fileNameWithExtension)
     {
@@ -108,5 +179,27 @@ class CheckController extends Controller
 
         return 0;
 
+    }
+
+    public function delete(Request $request)
+    {
+
+        if (!Input::has('id')) {
+            return Feedback::getFeedback(701);
+        }
+
+        if (!Check::where('id', '=', Input::get('id'))->exists()) {
+            return Feedback::getFeedback(701);
+        }
+
+        $check = Check::find($request->input('id'));
+
+        if (!is_null($check->file_id)) {
+            if (!CheckedFileController::deleteById($check->file_id)) return 603;
+        }
+
+        $check->delete();
+
+        return Feedback::getFeedback(0);
     }
 }

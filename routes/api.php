@@ -91,6 +91,10 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/checker/file/upload', 'CheckedFileController@upload');
         Route::post('/checker/file/download', 'CheckedFileController@download');
 
+        //CHECK
+        Route::post('/checker/get', 'CheckController@get');
+        Route::post('/checker/delete', 'CheckController@delete');
+
     });
 
 });
