@@ -16,12 +16,21 @@ class CheckController extends Controller
     public function get(Request $request)
     {
 
-        $status = trim(Input::get('status', ''));
+        $status_yes = Input::get('status_yes', true);
+        $status_no = Input::get('status_no', true);
+        $status_question = Input::get('status_question', true);
+
+        $statuses = [];
+        if ($status_yes) $statuses[] = 1;
+        if ($status_question) $statuses[] = 0;
+        if ($status_no) $statuses[] = -1;
+
+
         $owner = trim(Input::get('owner', ''));
         $filename = trim(Input::get('filename', ''));
         $mistake_count = trim(Input::get('mistake_count', ''));
         $timestamp = trim(Input::get('date', ''));
-        $isOnlyLast = trim(Input::get('is_only_last', false));
+        $isOnlyLast = Input::get('is_only_last', false);
 
         //DATE
         $dayStartDate = 1;
@@ -38,7 +47,6 @@ class CheckController extends Controller
         $query = DB::table('checks')
             ->whereBetween('created_at', [$dayStartDate, $dayEndDate])
             ->where('filename', 'like', '%' . $filename . '%')
-            ->where('status', 'like', '%' . $status . '%')
             ->where('mistake_count', 'like', '%' . $mistake_count . '%')
             ->whereIn('owner', $idUsers);
 
@@ -48,12 +56,17 @@ class CheckController extends Controller
                 ->groupBy('filename');
 
         } else {
-            $query->select(['id', 'file_id',  "filename", 'status', 'mistake_count', 'owner', 'created_at as date']);
+            $query->select(['id', 'file_id', "filename", 'status', 'mistake_count', 'owner', 'created_at as date']);
         }
 
+
         $items = $query
+            ->orderBy('filename', 'asc')
             ->orderBy('date', 'asc')
             ->get();
+
+        // Statuse отдельно, чтобы иметь возможность отоборать статусы после выбора последних записей
+        $items = $items->whereIn('status', $statuses);
 
 
         // Подменяем id на значения полей из других таблиц
@@ -103,7 +116,6 @@ class CheckController extends Controller
 
     public static function add($file_id, $owner_id)
     {
-
         $uploadedFile = CheckedFile::find($file_id);
         $path_parts = pathinfo($uploadedFile->original_name); // Filename without extension
 
@@ -112,7 +124,6 @@ class CheckController extends Controller
         } else {
             return self::addRecordOfCheckedFile($path_parts['filename'], $file_id, $owner_id);
         }
-
     }
 
     public static function addRecordOfNewFile($nameOfFileWithoutExtension, $file_id, $owner_id)

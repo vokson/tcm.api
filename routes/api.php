@@ -87,13 +87,15 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/charts/logs/created/get', 'StatisticController@getItemsForLogChart');
         Route::post('/charts/titles/created/get', 'StatisticController@getItemsForTitleChart');
 
-        //CHECK FILES
+        // CHECK FILES
         Route::post('/checker/file/upload', 'CheckedFileController@upload');
         Route::post('/checker/file/download', 'CheckedFileController@download');
 
-        //CHECK
+        // CHECK
         Route::post('/checker/get', 'CheckController@get');
-        Route::post('/checker/delete', 'CheckController@delete');
+        Route::middleware(['auth.checker.file.delete'])->group(function () {
+            Route::post('/checker/delete', 'CheckController@delete');
+        });
 
     });
 
