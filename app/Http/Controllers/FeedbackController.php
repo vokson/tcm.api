@@ -54,6 +54,8 @@ class FeedbackController extends Controller
         609 => 'Name of file is not correct',
         //Check
         701 => 'Wrong input Id',
+        //Chart
+        801 => 'Wrong input Storage Name'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])
