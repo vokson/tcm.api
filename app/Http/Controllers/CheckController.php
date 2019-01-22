@@ -28,6 +28,7 @@ class CheckController extends Controller
 
         $owner = trim(Input::get('owner', ''));
         $filename = trim(Input::get('filename', ''));
+        $extension = trim(Input::get('extension', ''));
         $mistake_count = trim(Input::get('mistake_count', ''));
         $timestamp = trim(Input::get('date', ''));
         $isOnlyLast = Input::get('is_only_last', false);
@@ -47,16 +48,17 @@ class CheckController extends Controller
         $query = DB::table('checks')
             ->whereBetween('created_at', [$dayStartDate, $dayEndDate])
             ->where('filename', 'like', '%' . $filename . '%')
+            ->where('extension', 'like', '%' . $extension . '%')
             ->where('mistake_count', 'like', '%' . $mistake_count . '%')
             ->whereIn('owner', $idUsers);
 
         if ($isOnlyLast == true) {
             $query
-                ->select(DB::raw('"id", "file_id", "filename", "status", "mistake_count", "owner", max("created_at") as "date"'))
+                ->select(DB::raw('"id", "file_id", "filename", "extension", "status", "mistake_count", "owner", max("created_at") as "date"'))
                 ->groupBy('filename');
 
         } else {
-            $query->select(['id', 'file_id', "filename", 'status', 'mistake_count', 'owner', 'created_at as date']);
+            $query->select(['id', 'file_id', "filename", "extension", 'status', 'mistake_count', 'owner', 'created_at as date']);
         }
 
 
@@ -120,13 +122,13 @@ class CheckController extends Controller
         $path_parts = pathinfo($uploadedFile->original_name); // Filename without extension
 
         if (self::validateNameOfNewFile($uploadedFile->original_name)) {
-            return self::addRecordOfNewFile($path_parts['filename'], $file_id, $owner_id);
+            return self::addRecordOfNewFile($path_parts['filename'], $path_parts['extension'], $file_id, $owner_id);
         } else {
-            return self::addRecordOfCheckedFile($path_parts['filename'], $file_id, $owner_id);
+            return self::addRecordOfCheckedFile($path_parts['filename'], $path_parts['extension'], $file_id, $owner_id);
         }
     }
 
-    public static function addRecordOfNewFile($nameOfFileWithoutExtension, $file_id, $owner_id)
+    public static function addRecordOfNewFile($nameOfFileWithoutExtension, $extension, $file_id, $owner_id)
     {
         $record = Check::where('filename', $nameOfFileWithoutExtension)->latest()->first();
 
@@ -141,6 +143,7 @@ class CheckController extends Controller
             $record = new Check();
             $record->file_id = $file_id;
             $record->filename = $nameOfFileWithoutExtension;
+            $record->extension = $extension;
             $record->status = 0;
             $record->mistake_count = 0;
             $record->owner = $owner_id;
@@ -151,7 +154,7 @@ class CheckController extends Controller
 
     }
 
-    public static function addRecordOfCheckedFile($nameOfFileWithoutExtension, $file_id, $owner_id)
+    public static function addRecordOfCheckedFile($nameOfFileWithoutExtension, $extension, $file_id, $owner_id)
     {
         //Разделяем имя файла
         $arr = explode('[', $nameOfFileWithoutExtension);
@@ -182,6 +185,7 @@ class CheckController extends Controller
             $record = new Check();
             if ($status === -1) $record->file_id = $file_id;
             $record->filename = $filename;
+            $record->extension = $extension;
             $record->status = $status;
             $record->mistake_count = $countOfMistakes;
             $record->owner = $owner_id;
