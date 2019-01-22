@@ -35,9 +35,10 @@ class CheckedFileController extends Controller
             return Feedback::getFeedback(609);
         }
 
+        $path_parts = pathinfo($originalNameOfFile);
 
         $file = new CheckedFile();
-        $file->original_name = $originalNameOfFile;
+        $file->original_name = $path_parts['filename'] . '.' . strtolower($path_parts['extension']);
         $file->size = $request->file('log_file')->getSize();
         $file->uin = $request->input('uin');
         $file->server_name = '';
