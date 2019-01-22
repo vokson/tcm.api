@@ -120,6 +120,7 @@ class CheckController extends Controller
     {
         $uploadedFile = CheckedFile::find($file_id);
         $path_parts = pathinfo($uploadedFile->original_name); // Filename without extension
+        $path_parts['extension'] = strtolower($path_parts['extension']);
 
         if (self::validateNameOfNewFile($uploadedFile->original_name)) {
             return self::addRecordOfNewFile($path_parts['filename'], $path_parts['extension'], $file_id, $owner_id);
