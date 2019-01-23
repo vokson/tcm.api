@@ -36,8 +36,8 @@ class ApiCheckRole
             "api/checker/get",
             "api/checker/delete",
             "api/checker/file/upload",
-            "api/checker/file/download"
-            ,
+            "api/checker/file/download",
+            "api/checker/file/download/all",
         ];
 
         $group_leader = [
