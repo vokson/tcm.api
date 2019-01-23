@@ -52,6 +52,7 @@ return array(
     'App\\Setting' => $baseDir . '/app/Setting.php',
     'App\\Status' => $baseDir . '/app/Status.php',
     'App\\Title' => $baseDir . '/app/Title.php',
+    'App\\TitleHistoryRecord' => $baseDir . '/app/TitleHistoryRecord.php',
     'App\\UploadedFile' => $baseDir . '/app/UploadedFile.php',
     'App\\User' => $baseDir . '/app/User.php',
     'Asm89\\Stack\\Cors' => $vendorDir . '/asm89/stack-cors/src/Asm89/Stack/Cors.php',

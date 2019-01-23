@@ -9,8 +9,8 @@ use App\Log;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use ZipArchive;
 use App\Http\Controllers\SettingsController as Settings;
+use App\Http\Controllers\ZipArchiveController;
 
 class LogFileController extends Controller
 {
@@ -168,6 +168,10 @@ class LogFileController extends Controller
         }
 
         $file = UploadedFile::find($file_id);
+        // Проверяем существует ли файл на диске
+        if (!file_exists(storage_path("app/" . $file->server_name))) {
+            return response(Feedback::getFeedback(601), 500);
+        }
 
         $headers = array(
             'Content-Type' => 'application/octet-stream',
@@ -180,37 +184,53 @@ class LogFileController extends Controller
 
     public function downloadAll(Request $request)
     {
-        $this->cleanOldArchives();
-
         $log_id = intval(Input::get('id', 0));
         $files = UploadedFile::where('log', $log_id)->get();
 
-        $fileForZipArchive = [];
+        $filesForZipArchive = [];
         foreach ($files as $file) {
-            $fileForZipArchive[] = [
+            $filesForZipArchive[] = [
                 'absolute_path' => storage_path("app/" . $file->server_name),
                 'filename' => $file->original_name
             ];
         }
 
-        $archiveName =  uniqid() . '.zip';
-
-        $zipPath = config('filesystems.archiveStoragePath') . DIRECTORY_SEPARATOR . $archiveName;
-
-        set_time_limit(Settings::take('ARCHIVE_CREATION_TIME') );
-
-        if ($this->createArchive($fileForZipArchive, $zipPath) === FALSE) {
-            return Feedback::getFeedback(608);
-        }
-
-       $headers = array(
-            'Content-Type' => 'application/octet-stream',
-            'Access-Control-Expose-Headers' => 'Content-Filename',
-            'Content-Filename' => $archiveName
-        );
-
-        return response()->download($zipPath, "", $headers);
+        return ZipArchiveController::download($filesForZipArchive);
     }
+
+//    public function downloadAll(Request $request)
+//    {
+//        $this->cleanOldArchives();
+//
+//        $log_id = intval(Input::get('id', 0));
+//        $files = UploadedFile::where('log', $log_id)->get();
+//
+//        $fileForZipArchive = [];
+//        foreach ($files as $file) {
+//            $fileForZipArchive[] = [
+//                'absolute_path' => storage_path("app/" . $file->server_name),
+//                'filename' => $file->original_name
+//            ];
+//        }
+//
+//        $archiveName =  uniqid() . '.zip';
+//
+//        $zipPath = config('filesystems.archiveStoragePath') . DIRECTORY_SEPARATOR . $archiveName;
+//
+//        set_time_limit(Settings::take('ARCHIVE_CREATION_TIME') );
+//
+//        if ($this->createArchive($fileForZipArchive, $zipPath) === FALSE) {
+//            return Feedback::getFeedback(608);
+//        }
+//
+//       $headers = array(
+//            'Content-Type' => 'application/octet-stream',
+//            'Access-Control-Expose-Headers' => 'Content-Filename',
+//            'Content-Filename' => $archiveName
+//        );
+//
+//        return response()->download($zipPath, "", $headers);
+//    }
 
     public function clean()
     {
@@ -228,34 +248,34 @@ class LogFileController extends Controller
         return Feedback::getFeedback();
     }
 
-    public function createArchive($files, $zipPath)
-    {
-
-        $zip = new ZipArchive();
-
-        if ($zip->open($zipPath, ZIPARCHIVE::CREATE) === TRUE) {
-
-            foreach ($files as $file) {
-                if (file_exists($file['absolute_path'])) {
-                    $zip->addFile($file['absolute_path'], $file['filename']);
-                }
-            }
-
-            if ($zip->numFiles == 0) return FALSE;
-
-            return ($zip->status == ZipArchive::ER_OK);
-        }
-
-        return FALSE;
-    }
-
-    public function cleanOldArchives()
-    {
-        foreach (glob(config('filesystems.archiveStoragePath'). DIRECTORY_SEPARATOR  . '*') as $fileName) {
-            if ( (microtime(true) - filectime($fileName) > Settings::take('ARCHIVE_STORAGE_TIME') )) {
-                unlink($fileName);
-            }
-        }
-    }
+//    public function createArchive($files, $zipPath)
+//    {
+//
+//        $zip = new ZipArchive();
+//
+//        if ($zip->open($zipPath, ZIPARCHIVE::CREATE) === TRUE) {
+//
+//            foreach ($files as $file) {
+//                if (file_exists($file['absolute_path'])) {
+//                    $zip->addFile($file['absolute_path'], $file['filename']);
+//                }
+//            }
+//
+//            if ($zip->numFiles == 0) return FALSE;
+//
+//            return ($zip->status == ZipArchive::ER_OK);
+//        }
+//
+//        return FALSE;
+//    }
+//
+//    public function cleanOldArchives()
+//    {
+//        foreach (glob(config('filesystems.archiveStoragePath'). DIRECTORY_SEPARATOR  . '*') as $fileName) {
+//            if ( (microtime(true) - filectime($fileName) > Settings::take('ARCHIVE_STORAGE_TIME') )) {
+//                unlink($fileName);
+//            }
+//        }
+//    }
 
 }

@@ -49,4 +49,20 @@ class ServiceController extends Controller
         return;
     }
 
+    public static function createFolderForFileByNumber($number)
+    {
+        $min = intdiv($number, 1000) * 1000 + 1;
+        $max = (intdiv($number, 1000) + 1) * 1000;
+
+        if ($number % 1000 == 0) {
+            $min = $min - 1000;
+            $max = $max - 1000;
+        }
+
+//        echo "MIN = " . $min . '<br/>';
+//        echo "MAX = " . $max . '<br/>';
+
+        return sprintf("%05d-%05d", $min, $max);
+    }
+
 }

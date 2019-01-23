@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
         'auth.log.file.edit' => \App\Http\Middleware\ApiCheckLogFileEditPermission::class,
         'reg_exp.log.file.edit' => \App\Http\Middleware\ApiCheckLogFileEditRegExpPermission::class,
         'auth.log.new.message' => \App\Http\Middleware\ApiCheckLogMarkNewMessagePermission::class,
+        'auth.checker.file.delete' => \App\Http\Middleware\ApiCheckCheckerFileDeletePermission::class,
     ];
 }
