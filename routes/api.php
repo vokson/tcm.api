@@ -99,7 +99,13 @@ Route::middleware(['cors'])->group(function () {
             Route::post('/checker/delete', 'CheckController@delete');
         });
 
+        // SENDER
+        Route::post('/sender/folder/add', 'SenderFolderController@add');
+        Route::post('/sender/folder/get', 'SenderFolderController@get');
+        Route::post('/sender/folder/delete', 'SenderFolderController@delete');
 
+        // SENDER FILES
+        Route::post('/sender/file/upload', 'SenderFileController@upload');
 
     });
 

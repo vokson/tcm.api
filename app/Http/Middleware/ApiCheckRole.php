@@ -38,6 +38,10 @@ class ApiCheckRole
             "api/checker/file/upload",
             "api/checker/file/download",
             "api/checker/file/download/all",
+            "api/sender/folder/add",
+            "api/sender/folder/get",
+            "api/sender/folder/delete",
+            "api/sender/file/upload",
         ];
 
         $group_leader = [
