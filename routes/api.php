@@ -99,7 +99,11 @@ Route::middleware(['cors'])->group(function () {
             Route::post('/checker/delete', 'CheckController@delete');
         });
 
+
+
     });
+
+//    Route::get('/test', 'CheckController@test');
 
 });
 

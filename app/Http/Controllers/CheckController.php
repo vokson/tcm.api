@@ -67,20 +67,20 @@ class CheckController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        // Statuse отдельно, чтобы иметь возможность отоборать статусы после выбора последних записей
-        $items = $items->whereIn('status', $statuses);
-
-
         // Подменяем id на значения полей из других таблиц
-
         $items->transform(function ($item, $key) use ($idNamesUsers) {
             $item->owner = $idNamesUsers[$item->owner];
             return $item;
         });
 
 
+        // Statuses отдельно, чтобы иметь возможность отоборать статусы после выбора последних записей
+        $items = $items->whereIn('status', $statuses);
+
         return Feedback::getFeedback(0, [
-            'items' => $items->toArray(),
+            // array_values добавлено, потому что whereIn (также как и array_filter) выдает
+            // ассоциативынй массив, что в данном случае не нужно
+            'items' => array_values($items->toArray()),
         ]);
 
     }
