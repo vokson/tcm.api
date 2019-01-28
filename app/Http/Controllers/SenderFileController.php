@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class SenderFileController extends Controller
 {
@@ -82,25 +83,56 @@ class SenderFileController extends Controller
         ]);
     }
 
-//    public static function deleteById($id)
-//    {
-//        $file = CheckedFile::find($id);
-//
-//        if (!is_null($file)) {
-//
-//            try {
-//                Storage::delete($file->server_name);
-//
-//            } catch (QueryException $e) {
-//
-//                return false;
-//            }
-//        }
-//
-//        CheckedFile::destroy($id);
-//
-//        return true;
-//    }
+    public function get(Request $request)
+    {
+
+        $folder_id = null;
+        if (Input::has('folder_id')) {
+
+            if (!SenderFolder::where('id', '=', Input::get('folder_id'))->exists()) {
+                return Feedback::getFeedback(604);
+            } else {
+                $folder_id = $request->input('folder_id');
+            }
+        }
+
+        $items = DB::table('sender_files')
+            ->where('folder', $folder_id)
+            ->select(['id', 'original_name as filename', 'created_at as date'])
+            ->get();
+
+        // Подменяем id на значения полей из других таблиц
+//        $items->transform(function ($item, $key) {
+//            $item->owner = ApiAuthController::getSurnameAndNameOfUserById($item->owner);
+//            return $item;
+//        });
+
+        return Feedback::getFeedback(0, [
+            'items' => $items->toArray()
+        ]);
+
+    }
+
+    public static function delete(Request $request)
+    {
+        $file_id = intval(Input::get('id', 0));
+        $file = SenderFile::find($file_id);
+
+        if (!is_null($file)) {
+
+            try {
+                Storage::delete($file->server_name);
+
+            } catch (QueryException $e) {
+
+                return Feedback::getFeedback(603);
+            }
+        }
+
+        SenderFile::destroy($file_id);
+
+        return Feedback::getFeedback(0);
+    }
 //
 //    public function download(Request $request)
 //    {

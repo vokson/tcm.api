@@ -42,6 +42,8 @@ class ApiCheckRole
             "api/sender/folder/get",
             "api/sender/folder/delete",
             "api/sender/file/upload",
+            "api/sender/file/get",
+            "api/sender/file/delete",
         ];
 
         $group_leader = [

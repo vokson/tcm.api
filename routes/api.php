@@ -106,6 +106,8 @@ Route::middleware(['cors'])->group(function () {
 
         // SENDER FILES
         Route::post('/sender/file/upload', 'SenderFileController@upload');
+        Route::post('/sender/file/get', 'SenderFileController@get');
+        Route::post('/sender/file/delete', 'SenderFileController@delete');
 
     });
 
