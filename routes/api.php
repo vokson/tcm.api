@@ -102,12 +102,15 @@ Route::middleware(['cors'])->group(function () {
         // SENDER
         Route::post('/sender/folder/add', 'SenderFolderController@add');
         Route::post('/sender/folder/get', 'SenderFolderController@get');
-        Route::post('/sender/folder/delete', 'SenderFolderController@delete');
+        Route::middleware(['auth.sender.folder.delete'])->group(function () {
+            Route::post('/sender/folder/delete', 'SenderFolderController@delete');
+        });
 
         // SENDER FILES
         Route::post('/sender/file/upload', 'SenderFileController@upload');
         Route::post('/sender/file/get', 'SenderFileController@get');
         Route::post('/sender/file/delete', 'SenderFileController@delete');
+
 
     });
 

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\SenderFile;
 use App\SenderFolder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SenderFolderController extends Controller
 {
@@ -41,7 +43,16 @@ class SenderFolderController extends Controller
 
     function delete(Request $request)
     {
-        $isDeleted = SenderFolder::destroy(intval(Input::get('id', 0)));
-        return ($isDeleted) ? Feedback::getFeedback(0) : Feedback::getFeedback(901);
+        $folder_id = intval(Input::get('id', 0));
+
+        $files = SenderFile::where('folder', $folder_id)->get();
+
+        foreach ($files as $file) {
+            if ( (Storage::delete($file->server_name) === false) || ($file->delete() === false)) {
+                return Feedback::getFeedback(603);
+            }
+        }
+
+        return (SenderFolder::destroy($folder_id)) ? Feedback::getFeedback(0) : Feedback::getFeedback(901);
     }
 }

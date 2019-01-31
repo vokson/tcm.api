@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use App\Check;
 
 class SenderFileController extends Controller
 {
@@ -101,11 +102,24 @@ class SenderFileController extends Controller
             ->select(['id', 'original_name as filename', 'created_at as date'])
             ->get();
 
-        // Подменяем id на значения полей из других таблиц
-//        $items->transform(function ($item, $key) {
-//            $item->owner = ApiAuthController::getSurnameAndNameOfUserById($item->owner);
-//            return $item;
-//        });
+        // Подменяем значения полей
+        $items->transform(function ($item, $key) {
+
+            // Имя файла и расширение
+            $path_parts = pathinfo($item->filename);
+            $item->filename = $path_parts['filename'];
+            $item->extension = $path_parts['extension'];
+
+            // Статус, собственник, ошибки
+            $check = Check::where('filename', $item->filename)->latest()->first();
+            if (!is_null($check)) {
+                $item->status = $check->status;
+                $item->owner = ApiAuthController::getSurnameAndNameOfUserById($check->owner);
+                $item->mistake_count = $check->mistake_count;
+            }
+
+            return $item;
+        });
 
         return Feedback::getFeedback(0, [
             'items' => $items->toArray()
