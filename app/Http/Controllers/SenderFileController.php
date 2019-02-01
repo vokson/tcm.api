@@ -147,50 +147,50 @@ class SenderFileController extends Controller
 
         return Feedback::getFeedback(0);
     }
-//
-//    public function download(Request $request)
-//    {
-//        $file_id = null;
-//        if (Input::has('id')) {
-//
-//            if (!CheckedFile::where('id', '=', Input::get('id'))->exists()) {
-//                return Feedback::getFeedback(604);
-//            } else {
-//                $file_id = $request->input('id');
-//            }
-//        }
-//
-//        $file = CheckedFile::find($file_id);
-//
-//        $headers = array(
-//            'Content-Type' => 'application/octet-stream',
-//            'Access-Control-Expose-Headers' => 'Content-Filename',
-//            'Content-Filename' => rawurlencode($file->original_name)
-//        );
-//
-//        return response()->download(storage_path("app/" . $file->server_name), "", $headers);
-//    }
-//
-//    public function downloadAll(Request $request)
-//    {
-//        $file_ids = Input::get('ids', []);
-//
-//        $filesForZipArchive = [];
-//        foreach ($file_ids as $file_id) {
-//
-//            $file = CheckedFile::find($file_id);
-//
-//            if (!is_null($file)) {
-//
-//                $filesForZipArchive[] = [
-//                    'absolute_path' => storage_path("app/" . $file->server_name),
-//                    'filename' => $file->original_name
-//                ];
-//            }
-//        }
-//
-//        return ZipArchiveController::download($filesForZipArchive);
-//    }
+
+    public function download(Request $request)
+    {
+        $file_id = null;
+        if (Input::has('id')) {
+
+            if (!SenderFile::where('id', '=', Input::get('id'))->exists()) {
+                return Feedback::getFeedback(604);
+            } else {
+                $file_id = $request->input('id');
+            }
+        }
+
+        $file = SenderFile::find($file_id);
+
+        $headers = array(
+            'Content-Type' => 'application/octet-stream',
+            'Access-Control-Expose-Headers' => 'Content-Filename',
+            'Content-Filename' => rawurlencode($file->original_name)
+        );
+
+        return response()->download(storage_path("app/" . $file->server_name), "", $headers);
+    }
+
+    public function downloadAll(Request $request)
+    {
+        $file_ids = Input::get('ids', []);
+
+        $filesForZipArchive = [];
+        foreach ($file_ids as $file_id) {
+
+            $file = SenderFile::find($file_id);
+
+            if (!is_null($file)) {
+
+                $filesForZipArchive[] = [
+                    'absolute_path' => storage_path("app/" . $file->server_name),
+                    'filename' => $file->original_name
+                ];
+            }
+        }
+
+        return ZipArchiveController::download($filesForZipArchive);
+    }
 
 
 }

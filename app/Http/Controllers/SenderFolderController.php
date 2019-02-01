@@ -55,4 +55,11 @@ class SenderFolderController extends Controller
 
         return (SenderFolder::destroy($folder_id)) ? Feedback::getFeedback(0) : Feedback::getFeedback(901);
     }
+
+    function count()
+    {
+        return Feedback::getFeedback(0, [
+            'count' => SenderFolder::all()->count()
+        ]);
+    }
 }

@@ -105,11 +105,14 @@ Route::middleware(['cors'])->group(function () {
         Route::middleware(['auth.sender.folder.delete'])->group(function () {
             Route::post('/sender/folder/delete', 'SenderFolderController@delete');
         });
+        Route::post('/sender/folder/count', 'SenderFolderController@count');
 
         // SENDER FILES
         Route::post('/sender/file/upload', 'SenderFileController@upload');
         Route::post('/sender/file/get', 'SenderFileController@get');
         Route::post('/sender/file/delete', 'SenderFileController@delete');
+        Route::post('/sender/file/download', 'SenderFileController@download');
+        Route::post('/sender/file/download/all', 'SenderFileController@downloadAll');
 
 
     });
