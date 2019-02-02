@@ -100,6 +100,8 @@ class SenderFileController extends Controller
         $items = DB::table('sender_files')
             ->where('folder', $folder_id)
             ->select(['id', 'original_name as filename', 'created_at as date'])
+            ->orderBy('filename', 'asc')
+            ->orderBy('date', 'asc')
             ->get();
 
         // Подменяем значения полей
