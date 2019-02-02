@@ -10,6 +10,7 @@ use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Check;
+use App\Http\Controllers\CheckController;
 
 class SenderFileController extends Controller
 {
@@ -40,10 +41,9 @@ class SenderFileController extends Controller
 
         $originalNameOfFile = $request->file('log_file')->getClientOriginalName();
 
-//        if (!CheckController::validateNameOfNewFile($originalNameOfFile) &&
-//            !CheckController::validateNameOfCheckedFile($originalNameOfFile)) {
-//            return Feedback::getFeedback(609);
-//        }
+        if (!CheckController::validateNameOfNewFile($originalNameOfFile))  {
+            return Feedback::getFeedback(609);
+        }
 
         $path_parts = pathinfo($originalNameOfFile);
 
