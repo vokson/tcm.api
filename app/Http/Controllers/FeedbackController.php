@@ -56,6 +56,7 @@ class FeedbackController extends Controller
         701 => 'Wrong input Id',
         //Chart
         801 => 'Wrong input Storage Name',
+        802 => 'Empty regular expression',
         //Sender
         901 => 'Wrong input Id'
     ];
