@@ -33,6 +33,7 @@ class ApiCheckRole
             "api/charts/logs/created/get",
             "api/charts/titles/created/get",
             "api/charts/titles/status/get",
+            "api/charts/tq/status/get",
             "api/charts/storage/get",
             "api/checker/get",
             "api/checker/delete",

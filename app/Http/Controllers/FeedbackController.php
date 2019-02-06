@@ -57,6 +57,8 @@ class FeedbackController extends Controller
         //Chart
         801 => 'Wrong input Storage Name',
         802 => 'Empty regular expression',
+        803 => 'Volume of title is not integer type',
+        804 => 'Incorrect predecessor of title',
         //Sender
         901 => 'Wrong input Id'
     ];
