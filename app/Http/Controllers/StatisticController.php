@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
@@ -208,7 +209,197 @@ class StatisticController extends Controller
         return $arr;
     }
 
+    public function getItemsForTitleStatusChart(Request $request)
+    {
+        $title_reg_exp = trim(Input::get('title_regular_expression', ''));
+        $status_reg_exp = trim(Input::get('status_regular_expression', ''));
+        $description_reg_exp = trim(Input::get('description_regular_expression', ''));
 
+        if ($title_reg_exp == '' || $status_reg_exp == '' || $description_reg_exp == '') {
+            return Feedback::getFeedback(802);
+        }
+
+        $interval = intval(trim(Input::get('interval', '')));
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval((Input::get('date2', '')));
+
+        //DATE
+        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
+        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
+
+        $query = DB::table('titles_history')
+            ->select('id', 'title_id', 'name', 'status', 'description', 'created_at')
+            ->where('created_at', '<', $endDate);
+
+        $items = $query
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $items = $items->toArray();
+
+
+        // Удаляем все титулы, не подходящие под регулярное выражение.
+        foreach ($items as $key => $value) {
+            if (preg_match($title_reg_exp, $value->name) != 1 || preg_match($description_reg_exp, $value->description) != 1) {
+                unset ($items[$key]);
+            }
+        }
+
+//        return $items;
+
+        $itemsHavingCurrentStatus = [];
+        $itemsNotHavingCurrentStatus = [];
+
+        foreach ($items as $key => $value) {
+
+            if (preg_match($status_reg_exp, $value->status) == 1) {
+                $itemsHavingCurrentStatus[$value->title_id] = $value->created_at;
+            } else {
+                if (
+                    (isset($itemsHavingCurrentStatus[$value->title_id])) &&
+                    ($value->created_at > $itemsHavingCurrentStatus[$value->title_id]) &&
+                    (
+                        !isset($itemsNotHavingCurrentStatus[$value->title_id]) ||
+                        (
+                            isset($itemsNotHavingCurrentStatus[$value->title_id]) &&
+                            $value->created_at < $itemsNotHavingCurrentStatus[$value->title_id]
+                        )
+                    )
+                ) {
+                    $itemsNotHavingCurrentStatus[$value->title_id] = $value->created_at;
+                }
+            }
+        }
+
+        $itemsHavingCurrentStatus = array_sort(array_values($itemsHavingCurrentStatus));
+        $itemsNotHavingCurrentStatus = array_sort(array_values($itemsNotHavingCurrentStatus));
+
+        $labels = [];
+        $values = [];
+        $totalCountOfNotRepliedTitles = 0;
+
+        $max = max($itemsHavingCurrentStatus, $itemsNotHavingCurrentStatus);
+
+        while (count($itemsHavingCurrentStatus) > 0 || count($itemsNotHavingCurrentStatus) > 0) {
+
+            $a = (count($itemsHavingCurrentStatus) > 0 ? $itemsHavingCurrentStatus[0] : $max);
+            $b = (count($itemsNotHavingCurrentStatus) > 0 ? $itemsNotHavingCurrentStatus[0] : $max);
+
+            if ($a < $b) {
+                $totalCountOfNotRepliedTitles++;
+                $labels[] = array_shift($itemsHavingCurrentStatus);
+                $values[] = $totalCountOfNotRepliedTitles;
+            } else {
+                $totalCountOfNotRepliedTitles--;
+                $labels[] = array_shift($itemsNotHavingCurrentStatus);
+                $values[] = $totalCountOfNotRepliedTitles;
+            }
+
+        }
+
+        foreach ($labels as $key => $value) {
+            if ($value < $startDate || $value > $endDate) {
+                unset($labels[$key]);
+                unset($values[$key]);
+            }
+        }
+
+//        return $items;
+
+
+        return Feedback::getFeedback(0, [
+            'items' => ['labels' => array_values($labels), 'values' => array_values($values)]
+        ]);
+    }
+
+    public function getItemsForTqStatus(Request $request)
+    {
+        $title_reg_exp = trim(Input::get('title_regular_expression', ''));
+        $description_reg_exp = trim(Input::get('description_regular_expression', ''));
+
+        if ($title_reg_exp == '' || $description_reg_exp == '') {
+            return Feedback::getFeedback(802);
+        }
+
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval((Input::get('date2', '')));
+
+        //DATE
+        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
+        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
+
+        $items = DB::table('titles_history')
+            ->select('id', 'title_id', 'name', 'status', 'predecessor', 'description', 'volume', 'created_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orWhere(function ($query) {
+                $query->where('status', '=', 'APPROVED')
+                    ->where('status', '=', 'REJECTED');
+            })
+            ->get()
+            ->toArray();
+
+
+        // Удаляем все титулы, не подходящие под регулярное выражение.
+        foreach ($items as $key => $value) {
+            if (preg_match($title_reg_exp, $value->name) != 1 || preg_match($description_reg_exp, $value->description) != 1) {
+                unset ($items[$key]);
+            }
+        }
+
+//        return $items;
+
+        $rejected = 0;
+        $approvedWithChanges = 0;
+        $approvedWithoutChanges = 0;
+        $reasonCodes = [0, 0, 0, 0];
+
+        foreach ($items as $item) {
+            $item->predecessor = intval($item->predecessor);
+            $item->volume = intval($item->volume);
+
+            if ($item->status === 'REJECTED') {
+                $rejected++;
+            }
+
+            if ($item->status === 'APPROVED' && $item->predecessor == null) {
+                $approvedWithoutChanges++;
+            }
+
+            if ($item->status === 'APPROVED' && $item->predecessor != null) {
+
+                if (!is_int($item->volume)) {
+                    return Feedback::getFeedback(803, (array)$item);
+                }
+
+                $approvedWithChanges++;
+
+                if (in_array($item->predecessor, [1, 2, 3, 4])) {
+                    $reasonCodes[$item->predecessor - 1] += $item->volume;
+
+                } else {
+                    return Feedback::getFeedback(804, (array)$item);
+                }
+
+            }
+        }
+
+
+        return Feedback::getFeedback(0, [
+            'items' => [
+                'count' => [
+                    'rejected' => $rejected,
+                    'approvedWithChanges' => $approvedWithChanges,
+                    'approvedWithoutChanges' => $approvedWithoutChanges,
+                ],
+                'changes' => [
+                    'code_1' => $reasonCodes[0],
+                    'code_2' => $reasonCodes[1],
+                    'code_3' => $reasonCodes[2],
+                    'code_4' => $reasonCodes[3],
+                ]
+            ]
+        ]);
+    }
 
 
 }

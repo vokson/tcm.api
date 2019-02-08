@@ -86,6 +86,8 @@ Route::middleware(['cors'])->group(function () {
         // STATISTIC
         Route::post('/charts/logs/created/get', 'StatisticController@getItemsForLogChart');
         Route::post('/charts/titles/created/get', 'StatisticController@getItemsForTitleChart');
+        Route::post('/charts/titles/status/get', 'StatisticController@getItemsForTitleStatusChart');
+        Route::post('/charts/tq/status/get', 'StatisticController@getItemsForTqStatus');
         Route::post('charts/storage/get', 'StatisticController@getItemsForStorageChart');
 
         // CHECK FILES
@@ -99,6 +101,20 @@ Route::middleware(['cors'])->group(function () {
             Route::post('/checker/delete', 'CheckController@delete');
         });
 
+        // SENDER
+        Route::post('/sender/folder/add', 'SenderFolderController@add');
+        Route::post('/sender/folder/get', 'SenderFolderController@get');
+        Route::middleware(['auth.sender.folder.delete'])->group(function () {
+            Route::post('/sender/folder/delete', 'SenderFolderController@delete');
+        });
+        Route::post('/sender/folder/count', 'SenderFolderController@count');
+
+        // SENDER FILES
+        Route::post('/sender/file/upload', 'SenderFileController@upload');
+        Route::post('/sender/file/get', 'SenderFileController@get');
+        Route::post('/sender/file/delete', 'SenderFileController@delete');
+        Route::post('/sender/file/download', 'SenderFileController@download');
+        Route::post('/sender/file/download/all', 'SenderFileController@downloadAll');
 
 
     });

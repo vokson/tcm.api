@@ -16,6 +16,19 @@ class ApiAuthController extends Controller
         return (Settings::take('TOKEN_LIFE_TIME') > (time() - $timeOfLastVisit->timestamp));
     }
 
+    public static function id(Request $request) {
+        $token = $request->input('access_token');
+        $user = ApiUser::where('access_token', $token)->first();
+        return $user->id;
+    }
+
+    public static function getSurnameAndNameOfUserById($id) {
+        $user = ApiUser::find($id);
+        return $user->surname . ' ' . $user->name;
+    }
+
+
+
     public function login(Request $request)
     {
         $email = $request->input('email');
