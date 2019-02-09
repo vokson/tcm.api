@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Status;
+use App\TitleHistoryRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
@@ -331,10 +332,7 @@ class StatisticController extends Controller
         $items = DB::table('titles_history')
             ->select('id', 'title_id', 'name', 'status', 'predecessor', 'description', 'volume', 'created_at')
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->orWhere(function ($query) {
-                $query->where('status', '=', 'APPROVED')
-                    ->where('status', '=', 'REJECTED');
-            })
+            ->whereIn('status', ['APPROVED', 'REJECTED'])
             ->get()
             ->toArray();
 
@@ -353,16 +351,31 @@ class StatisticController extends Controller
         $approvedWithoutChanges = 0;
         $reasonCodes = [0, 0, 0, 0];
 
+        $daysRejected = [];
+        $daysApprovedWithChanges = [];
+        $daysApprovedWithoutChanges = [];
+
+        $maxDay = 0;
+
         foreach ($items as $item) {
             $item->predecessor = intval($item->predecessor);
             $item->volume = intval($item->volume);
 
+            $backlogTime = $this->getBacklogTimeForItemInTitleHistory($item->title_id);
+
+            $countOfDays = ($backlogTime === null) ? null : intval(round(($item->created_at - $backlogTime) / 24 / 60 / 60));
+            if ($countOfDays > $maxDay) {
+                $maxDay = $countOfDays;
+            }
+
             if ($item->status === 'REJECTED') {
                 $rejected++;
+                $daysRejected = $this->increaseItemOfArray($countOfDays, $daysRejected);
             }
 
             if ($item->status === 'APPROVED' && $item->predecessor == null) {
                 $approvedWithoutChanges++;
+                $daysApprovedWithoutChanges = $this->increaseItemOfArray($countOfDays, $daysApprovedWithoutChanges);
             }
 
             if ($item->status === 'APPROVED' && $item->predecessor != null) {
@@ -372,6 +385,7 @@ class StatisticController extends Controller
                 }
 
                 $approvedWithChanges++;
+                $daysApprovedWithChanges = $this->increaseItemOfArray($countOfDays, $daysApprovedWithChanges);
 
                 if (in_array($item->predecessor, [1, 2, 3, 4])) {
                     $reasonCodes[$item->predecessor - 1] += $item->volume;
@@ -382,6 +396,10 @@ class StatisticController extends Controller
 
             }
         }
+
+        $daysRejected = $this->fillArrayByZeroDays($maxDay, $daysRejected);
+        $daysApprovedWithChanges = $this->fillArrayByZeroDays($maxDay, $daysApprovedWithChanges);
+        $daysApprovedWithoutChanges = $this->fillArrayByZeroDays($maxDay, $daysApprovedWithoutChanges);
 
 
         return Feedback::getFeedback(0, [
@@ -396,9 +414,56 @@ class StatisticController extends Controller
                     'code_2' => $reasonCodes[1],
                     'code_3' => $reasonCodes[2],
                     'code_4' => $reasonCodes[3],
-                ]
+                ],
+                'days' => [
+                    'labels' => array_keys($daysRejected),
+                    'rejected' => array_values($daysRejected),
+                    'approvedWithChanges' => array_values($daysApprovedWithChanges),
+                    'approvedWithoutChanges' => array_values($daysApprovedWithoutChanges),
+                ],
             ]
         ]);
+    }
+
+    private function increaseItemOfArray($count, $array)
+    {
+        if ($count >= 0) {
+
+            if (isset($array[$count])) {
+                $array[$count] = $array[$count] + 1;
+
+            } else {
+                $array[$count] = (int)1;
+            }
+        }
+
+        return $array;
+
+    }
+
+    private function fillArrayByZeroDays($max, $array)
+    {
+        $newArray = [];
+
+        if (count($array) > 0) {
+            for ($i = 0; $i <= $max; $i++) {
+                $newArray[$i] = (isset($array[$i])) ? $array[$i] : 0;
+            }
+        }
+
+        return $newArray;
+    }
+
+    private function getBacklogTimeForItemInTitleHistory($titleId)
+    {
+        $item = DB::table('titles_history')
+            ->where('title_id', $titleId)
+            ->where('status', 'BACKLOG')
+            ->latest()
+            ->first();
+
+        return ($item === null) ? null : $item->created_at;
+
     }
 
 
