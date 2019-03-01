@@ -44,6 +44,7 @@ class ApiCheckRole
             "api/sender/folder/get",
             "api/sender/folder/delete",
             "api/sender/folder/count",
+            "api/sender/folder/switch/ready",
             "api/sender/file/upload",
             "api/sender/file/get",
             "api/sender/file/delete",

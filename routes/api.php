@@ -109,6 +109,10 @@ Route::middleware(['cors'])->group(function () {
         });
         Route::post('/sender/folder/count', 'SenderFolderController@count');
 
+        Route::middleware(['auth.sender.folder.switch'])->group(function () {
+            Route::post('/sender/folder/switch/ready', 'SenderFolderController@switch');
+        });
+
         // SENDER FILES
         Route::post('/sender/file/upload', 'SenderFileController@upload');
         Route::post('/sender/file/get', 'SenderFileController@get');

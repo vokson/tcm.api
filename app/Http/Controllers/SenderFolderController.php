@@ -27,7 +27,7 @@ class SenderFolderController extends Controller
     {
 
         $items = DB::table('sender_folders')
-            ->select(['id', 'name', 'owner', 'created_at as date'])
+            ->select(['id', 'name', 'owner', 'is_ready', 'created_at as date'])
             ->get();
 
         // Подменяем id на значения полей из других таблиц
@@ -54,6 +54,21 @@ class SenderFolderController extends Controller
         }
 
         return (SenderFolder::destroy($folder_id)) ? Feedback::getFeedback(0) : Feedback::getFeedback(901);
+    }
+
+    function switch(Request $request)
+    {
+        $id = intval(Input::get('id', 0));
+        $folder = SenderFolder::find($id);
+
+        if (is_null($folder)) {
+            return Feedback::getFeedback(901);
+        }
+
+        $folder->is_ready = ($folder->is_ready == 1) ? 0: 1;
+        $folder->save();
+
+        return Feedback::getFeedback(0);
     }
 
     function count()
