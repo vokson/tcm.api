@@ -24,7 +24,10 @@ Route::middleware(['cors'])->group(function () {
     Route::post('/auth/login/token', 'ApiAuthController@loginByToken');
     Route::post('/auth/check_token', 'ApiAuthController@isTokenValid');
 
-    Route::post('/test_guest', 'ApiAuthController@test');
+//    Route::post('/test_guest', 'ApiAuthController@test');
+
+    //MERGE PDF
+    Route::post('/merge/pdf/download', 'MergePdfController@download');
 
 
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
@@ -119,6 +122,8 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/sender/file/delete', 'SenderFileController@delete');
         Route::post('/sender/file/download', 'SenderFileController@download');
         Route::post('/sender/file/download/all', 'SenderFileController@downloadAll');
+
+
 
 
     });

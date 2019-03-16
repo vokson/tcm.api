@@ -30,7 +30,6 @@ class CheckController extends Controller
         $filename = trim(Input::get('filename', ''));
         $extension = trim(Input::get('extension', ''));
         $mistake_count = trim(Input::get('mistake_count', ''));
-//        $timestamp = trim(Input::get('date', ''));
         $isOnlyLast = Input::get('is_only_last', false);
 
         $date1 = intval(trim(Input::get('date1', '')));
@@ -44,13 +43,6 @@ class CheckController extends Controller
             $dayStartDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
             $dayEndDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
         }
-
-
-//        if ($timestamp != "") {
-//            $dayStartDate = DateTime::createFromFormat('U', $timestamp)->setTime(0, 0, 0)->format('U');
-//            $dayEndDate = DateTime::createFromFormat('U', $timestamp)->setTime(23, 59, 59)->format('U');
-//        }
-
 
         [$idUsers, $idNamesUsers] = $this->getNamesUsers($owner);
 

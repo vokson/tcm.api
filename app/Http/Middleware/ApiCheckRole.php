@@ -50,6 +50,7 @@ class ApiCheckRole
             "api/sender/file/delete",
             "api/sender/file/download",
             "api/sender/file/download/all",
+//            "api/merge/pdf/download",
         ];
 
         $group_leader = [
