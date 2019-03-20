@@ -26,9 +26,6 @@ Route::middleware(['cors'])->group(function () {
 
 //    Route::post('/test_guest', 'ApiAuthController@test');
 
-    //MERGE PDF
-    Route::post('/merge/pdf/download', 'MergePdfController@download');
-
 
     Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
 
@@ -123,7 +120,9 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/sender/file/download', 'SenderFileController@download');
         Route::post('/sender/file/download/all', 'SenderFileController@downloadAll');
 
-
+        //MERGE PDF
+        Route::post('/merge/pdf/upload', 'MergePdfController@upload');
+        Route::post('/merge/pdf/download', 'MergePdfController@download');
 
 
     });
