@@ -7,14 +7,39 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class MergePdfController extends Controller
 {
 
+    public function get(Request $request)
+    {
+
+        $items = DB::table('pdf_merge_files')
+            ->select(['id', 'drop_id as group', 'owner', 'original_name as filename', 'created_at as date'])
+            ->where('owner', ApiAuthController::id($request))
+            ->orderBy('group')
+            ->orderBy( 'filename')
+            ->get();
+
+        return Feedback::getFeedback(0, [
+            'items' => $items->toArray(),
+        ]);
+    }
+
+    public function clean(Request $request)
+    {
+
+        $deletedRows = PdfMergeFile::where('owner', ApiAuthController::id($request))->delete();
+
+        return Feedback::getFeedback(0, [
+            'items' => $deletedRows,
+        ]);
+    }
+
     public function upload(Request $request)
     {
 
-        $folder_id = $request->input('folder_id', 1);
 
         if (!$request->hasFile('pdf_file')) {
             return Feedback::getFeedback(601);
@@ -28,21 +53,41 @@ class MergePdfController extends Controller
             return Feedback::getFeedback(605);
         }
 
+        if (!Input::has('drop_uin')) {
+            return Feedback::getFeedback(605);
+        }
+
         $originalNameOfFile = $request->file('pdf_file')->getClientOriginalName();
 
-        if (!MergePdfController::validateNameOfNewFile($originalNameOfFile))  {
+        if (!MergePdfController::validateNameOfNewFile($originalNameOfFile)) {
             return Feedback::getFeedback(609);
         }
 
+        $owner = ApiAuthController::id($request);
         $path_parts = pathinfo($originalNameOfFile);
+
+        $drop_uin = $request->input('drop_uin');
+
+        DB::beginTransaction(); // НАЧАЛО ТРАНЗАКЦИИ
+
+        $maxDropIdForCurrentUin = PdfMergeFile::where('drop_uin', $drop_uin)->max('drop_id');
+        $maxDropIdForCurrentUser = PdfMergeFile::where('owner', $owner)->max('drop_id');
+
+        DB::commit(); // КОНЕЦ ТРАНЗАКЦИИ
+
+        $drop_id = (is_null($maxDropIdForCurrentUin)) ? ($maxDropIdForCurrentUser + 1) : $maxDropIdForCurrentUin;
 
         $file = new PdfMergeFile();
         $file->original_name = $path_parts['filename'] . '.' . strtolower($path_parts['extension']);
         $file->size = $request->file('pdf_file')->getSize();
         $file->uin = $request->input('uin');
-        $file->folder = $folder_id;
+        $file->drop_id = $drop_id;
+        $file->drop_uin = $drop_uin;
         $file->server_name = '';
+        $file->owner = $owner;
         $file->save();
+
+
 
 
         try {
@@ -91,10 +136,10 @@ class MergePdfController extends Controller
 //        exec('pwd', $output, $result);
 //        $output[] = 'RETURN ' . $result;
 
-        exec('cd ' . storage_path("app/pdf_merge_storage").'; pdftk 1.pdf 2.pdf cat output MERGED.pdf 2>&1', $output, $result);
+        exec('cd ' . storage_path("app/pdf_merge_storage") . '; pdftk 1.pdf 2.pdf cat output MERGED.pdf 2>&1', $output, $result);
         $output[] = 'RETURN ' . $result;
 
-        file_put_contents(storage_path("app/pdf_merge_storage/log.txt"),print_r( $output, true));
+        file_put_contents(storage_path("app/pdf_merge_storage/log.txt"), print_r($output, true));
 
         $headers = array(
             'Content-Type' => 'application/octet-stream',

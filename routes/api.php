@@ -121,8 +121,10 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/sender/file/download/all', 'SenderFileController@downloadAll');
 
         //MERGE PDF
-        Route::post('/merge/pdf/upload', 'MergePdfController@upload');
-        Route::post('/merge/pdf/download', 'MergePdfController@download');
+        Route::post('/merge/pdf/get', 'MergePdfController@get');
+        Route::post('/merge/pdf/clean', 'MergePdfController@clean');
+        Route::post('/merge/pdf/file/upload', 'MergePdfController@upload');
+        Route::post('/merge/pdf/file/download', 'MergePdfController@download');
 
 
     });

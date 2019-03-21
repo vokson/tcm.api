@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use App\Http\Controllers\SettingsController;
 
 class CreatePdfMergeFileTable extends Migration
 {
@@ -15,9 +16,16 @@ class CreatePdfMergeFileTable extends Migration
     {
         Schema::create('pdf_merge_files', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('folder');
-            $table->integer('size');
+
+            $table->integer('owner')
+                ->default(SettingsController::take('SYSTEM_USER_ID'))
+                ->references('id')->on('api_users')->onDelete('restrict');
+
+            $table->integer('drop_id');
+            $table->string('drop_uin');
             $table->string('original_name');
+
+            $table->integer('size');
             $table->string('server_name');
             $table->string('uin');
             $table->timestamps();
