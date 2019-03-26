@@ -19,7 +19,7 @@ class MergePdfController extends Controller
             ->select(['id', 'drop_id as group', 'owner', 'original_name as filename', 'created_at as date'])
             ->where('owner', ApiAuthController::id($request))
             ->orderBy('group')
-            ->orderBy( 'filename')
+            ->orderBy('filename')
             ->get();
 
         return Feedback::getFeedback(0, [
@@ -30,16 +30,28 @@ class MergePdfController extends Controller
     public function clean(Request $request)
     {
 
-        $deletedRows = PdfMergeFile::where('owner', ApiAuthController::id($request))->delete();
+        $filesToBeDeleted = PdfMergeFile::where('owner', ApiAuthController::id($request))->get();
 
-        return Feedback::getFeedback(0, [
-            'items' => $deletedRows,
-        ]);
+        foreach ($filesToBeDeleted as $file) {
+
+            try {
+                Storage::delete($file->server_name);
+
+            } catch (QueryException $e) {
+
+                return Feedback::getFeedback(603);
+            }
+
+            PdfMergeFile::destroy($file->id);
+
+        }
+
+        return Feedback::getFeedback(0);
     }
+
 
     public function upload(Request $request)
     {
-
 
         if (!$request->hasFile('pdf_file')) {
             return Feedback::getFeedback(601);
@@ -88,8 +100,6 @@ class MergePdfController extends Controller
         $file->save();
 
 
-
-
         try {
 
             $path = Storage::putFile(
@@ -126,20 +136,35 @@ class MergePdfController extends Controller
 
     public function download(Request $request)
     {
+        $pathOfMergedFile = 'log_file_storage' . DIRECTORY_SEPARATOR . 'PDF_MERGE_FILES' . DIRECTORY_SEPARATOR . 'MERGED_' . uniqid() . '.pdf';
+
+        $files = DB::table('pdf_merge_files')
+            ->select(['id', 'drop_id', 'owner', 'server_name', 'original_name'])
+            ->where('owner', ApiAuthController::id($request))
+            ->orderBy('drop_id')
+            ->orderBy('original_name')
+            ->get();
+
+        $command_string = 'cd ' . storage_path("app") . '; pdftk ';
+
+        foreach ($files as $file) {
+            $command_string .= $file->server_name . ' ';
+        }
+
+        $command_string .= 'cat output ' . $pathOfMergedFile . ' 2>&1';
 
         $output = [];
         $result = null;
+        exec($command_string, $output, $result);
 
-//        exec('cd ' . storage_path("app/pdf_merge_storage"), $output, $result);
-//        $output[] = 'RETURN ' . $result;
-//
-//        exec('pwd', $output, $result);
-//        $output[] = 'RETURN ' . $result;
-
-        exec('cd ' . storage_path("app/pdf_merge_storage") . '; pdftk 1.pdf 2.pdf cat output MERGED.pdf 2>&1', $output, $result);
-        $output[] = 'RETURN ' . $result;
-
-        file_put_contents(storage_path("app/pdf_merge_storage/log.txt"), print_r($output, true));
+        if (!file_exists(storage_path('app' . DIRECTORY_SEPARATOR . $pathOfMergedFile))) {
+            return Feedback::getFeedback(610, [
+                'command' => $command_string,
+                'result' => $result,
+                'output' => print_r($output, true),
+                'path' => storage_path('app' . DIRECTORY_SEPARATOR . $pathOfMergedFile)
+            ]);
+        }
 
         $headers = array(
             'Content-Type' => 'application/octet-stream',
@@ -147,6 +172,6 @@ class MergePdfController extends Controller
             'Content-Filename' => 'MERGED.pdf'
         );
 
-        return response()->download(storage_path("app/pdf_merge_storage/MERGED.pdf"), "", $headers);
+        return response()->download(storage_path('app' . DIRECTORY_SEPARATOR . $pathOfMergedFile), "", $headers);
     }
 }
