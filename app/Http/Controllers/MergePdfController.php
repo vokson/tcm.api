@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\SettingsController as Settings;
 
 class MergePdfController extends Controller
 {
@@ -136,7 +137,9 @@ class MergePdfController extends Controller
 
     public function download(Request $request)
     {
-        $pathOfMergedFile = 'log_file_storage' . DIRECTORY_SEPARATOR . 'PDF_MERGE_FILES' . DIRECTORY_SEPARATOR . 'MERGED_' . uniqid() . '.pdf';
+       $this->cleanOldMergedFiles();
+
+        $pathOfMergedFile = config('filesystems.mergedPdfPath') . DIRECTORY_SEPARATOR . 'MERGED_' . uniqid() . '.pdf';
 
         $files = DB::table('pdf_merge_files')
             ->select(['id', 'drop_id', 'owner', 'server_name', 'original_name'])
@@ -157,12 +160,12 @@ class MergePdfController extends Controller
         $result = null;
         exec($command_string, $output, $result);
 
-        if (!file_exists(storage_path('app' . DIRECTORY_SEPARATOR . $pathOfMergedFile))) {
+        if (!file_exists(storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile)) {
             return Feedback::getFeedback(610, [
                 'command' => $command_string,
                 'result' => $result,
                 'output' => print_r($output, true),
-                'path' => storage_path('app' . DIRECTORY_SEPARATOR . $pathOfMergedFile)
+                'path' => storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile
             ]);
         }
 
@@ -172,6 +175,21 @@ class MergePdfController extends Controller
             'Content-Filename' => 'MERGED.pdf'
         );
 
-        return response()->download(storage_path('app' . DIRECTORY_SEPARATOR . $pathOfMergedFile), "", $headers);
+        return response()->download(storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile, "", $headers);
+    }
+
+    private function cleanOldMergedFiles()
+    {
+        foreach (glob(
+                     storage_path('app') .
+                     DIRECTORY_SEPARATOR .
+                     config('filesystems.mergedPdfPath') .
+                     DIRECTORY_SEPARATOR .
+                     'MERGED_*'
+                 ) as $fileName) {
+            if ((microtime(true) - filectime($fileName) > Settings::take('ARCHIVE_STORAGE_TIME'))) {
+                unlink($fileName);
+            }
+        }
     }
 }
