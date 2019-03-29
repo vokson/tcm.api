@@ -123,6 +123,7 @@ Route::middleware(['cors'])->group(function () {
         //MERGE PDF
         Route::post('/merge/pdf/get', 'MergePdfController@get');
         Route::post('/merge/pdf/clean', 'MergePdfController@clean');
+        Route::post('/merge/pdf/set/main/name', 'MergePdfController@setMainName');
         Route::post('/merge/pdf/file/upload', 'MergePdfController@upload');
         Route::post('/merge/pdf/file/download', 'MergePdfController@download');
 

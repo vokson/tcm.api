@@ -52,6 +52,7 @@ class ApiCheckRole
             "api/sender/file/download/all",
             "api/merge/pdf/get",
             "api/merge/pdf/clean",
+            "api/merge/pdf/set/main/name",
             "api/merge/pdf/file/upload",
             "api/merge/pdf/file/download",
         ];

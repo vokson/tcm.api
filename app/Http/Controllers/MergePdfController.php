@@ -17,7 +17,7 @@ class MergePdfController extends Controller
     {
 
         $items = DB::table('pdf_merge_files')
-            ->select(['id', 'drop_id as group', 'owner', 'original_name as filename', 'created_at as date'])
+            ->select(['id', 'drop_id as group', 'owner', 'original_name as filename', 'created_at as date', 'is_name'])
             ->where('owner', ApiAuthController::id($request))
             ->orderBy('group')
             ->orderBy('filename')
@@ -26,6 +26,26 @@ class MergePdfController extends Controller
         return Feedback::getFeedback(0, [
             'items' => $items->toArray(),
         ]);
+    }
+
+    public static function setMainName(Request $request)
+    {
+        PdfMergeFile::where('owner', ApiAuthController::id($request))->update(['is_name' => false]);
+
+        $file_id = intval(Input::get('id', 0));
+
+        try {
+
+            PdfMergeFile::where('owner', ApiAuthController::id($request))
+                ->where('id', $file_id)
+                ->update(['is_name' => true]);
+
+        } catch (QueryException $e) {
+
+            return Feedback::getFeedback(604);
+        }
+
+        return Feedback::getFeedback(0);
     }
 
     public function clean(Request $request)
@@ -72,7 +92,7 @@ class MergePdfController extends Controller
 
         $originalNameOfFile = $request->file('pdf_file')->getClientOriginalName();
 
-        if (!MergePdfController::validateNameOfNewFile($originalNameOfFile)) {
+        if (!$this->validateNameOfNewFile($originalNameOfFile)) {
             return Feedback::getFeedback(609);
         }
 
@@ -100,6 +120,7 @@ class MergePdfController extends Controller
         $file->owner = $owner;
         $file->save();
 
+        // Попытка сохранить файл
 
         try {
 
@@ -122,13 +143,26 @@ class MergePdfController extends Controller
         $file->server_name = $path;
         $file->save();
 
+        // Проверка на главное имя
+        if (is_null($this->getMainNameOfMergedPdfForUser($file->owner))) {
+            $file->is_name = true;
+            $file->save();
+        }
+
+
         return Feedback::getFeedback(0, [
             'id' => $file->id,
             'uin' => $file->uin,
         ]);
     }
 
-    public static function validateNameOfNewFile($fileNameWithExtension)
+    private function getMainNameOfMergedPdfForUser($user_id)
+    {
+        $result = PdfMergeFile::where('owner', $user_id)->where('is_name', 1)->first();
+        return (is_null($result)) ? null : $result->original_name;
+    }
+
+    private function validateNameOfNewFile($fileNameWithExtension)
     {
         $regExpForNewFile = "/.*\.(pdf|PDF){1}$/";
         return (preg_match($regExpForNewFile, $fileNameWithExtension) === 1);
@@ -137,7 +171,7 @@ class MergePdfController extends Controller
 
     public function download(Request $request)
     {
-       $this->cleanOldMergedFiles();
+        $this->cleanOldMergedFiles();
 
         $pathOfMergedFile = config('filesystems.mergedPdfPath') . DIRECTORY_SEPARATOR . 'MERGED_' . uniqid() . '.pdf';
 
@@ -172,7 +206,7 @@ class MergePdfController extends Controller
         $headers = array(
             'Content-Type' => 'application/octet-stream',
             'Access-Control-Expose-Headers' => 'Content-Filename',
-            'Content-Filename' => 'MERGED.pdf'
+            'Content-Filename' => $this->getMainNameOfMergedPdfForUser(ApiAuthController::id($request))
         );
 
         return response()->download(storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile, "", $headers);
