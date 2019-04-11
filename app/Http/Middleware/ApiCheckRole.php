@@ -35,6 +35,7 @@ class ApiCheckRole
             "api/charts/titles/status/get",
             "api/charts/tq/status/get",
             "api/charts/storage/get",
+            "api/charts/checked/drawings/get",
             "api/checker/get",
             "api/checker/delete",
             "api/checker/file/upload",

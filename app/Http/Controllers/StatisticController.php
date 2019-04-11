@@ -159,17 +159,17 @@ class StatisticController extends Controller
         $items = $items->toArray();
 
         return Feedback::getFeedback(0, [
-            'items' => $this->divideItemsByIntervalUsingSize($items, $startDate, $endDate, $interval)
+            'items' => $this->divideItemsByIntervalUsingValue($items, $startDate, $endDate, $interval, 'size')
         ]);
     }
 
-    private function divideItemsByIntervalUsingSize($items, $startDate, $endDate, $interval)
+    private function divideItemsByIntervalUsingValue($items, $startDate, $endDate, $interval, $nameOfValue)
     {
 
         $items = array_values($items);
         $countOfIntervals = intdiv(intval($endDate) - intval($startDate), $interval);
 
-        $size = 0;
+        $value = 0;
         $i = 0;
 
         $labels = [];
@@ -181,13 +181,13 @@ class StatisticController extends Controller
                 ($i < count($items)) &&
                 ($items[$i]->created_at < (intval($startDate) + $n * $interval))
             ) {
-                $size += $items[$i]->size;
+                $value += $items[$i]->$nameOfValue;
                 $i++;
             }
 
             $labels[] = intval($startDate) + ($n - 1) * $interval;
-            $values[] = $size;
-            $size = 0;
+            $values[] = $value;
+            $value = 0;
 
         }
 
@@ -196,12 +196,12 @@ class StatisticController extends Controller
         if ((intval($startDate) + ($n - 1) * $interval) < intval($endDate)) {
             $labels[] = intval($startDate) + ($n - 1) * $interval;
 
-            $size = 0;
+            $value = 0;
             for ($k = $i; $k < count($items); $k++) {
-                $size += $items[$k]->size;
+                $value += $items[$k]->$nameOfValue;
             }
 
-            $values[] = $size;
+            $values[] = $value;
         }
 
         $arr['labels'] = $labels;
@@ -464,6 +464,97 @@ class StatisticController extends Controller
 
         return ($item === null) ? null : $item->created_at;
 
+    }
+
+    public function getItemsForCheckedDrawingsChart(Request $request)
+    {
+        $interval = intval(trim(Input::get('interval', '')));
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval((Input::get('date2', '')));
+        $user_id = intval((Input::get('user_id', 0)));
+        $file_reg_exp = trim(Input::get('file_regular_expression', ''));
+
+        //DATE
+        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
+        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
+
+        $inItems = DB::table('checks')
+            ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('owner', $user_id)
+            ->get()
+            ->toArray();
+
+
+        // Удаляем все титулы, не подходящие под регулярное выражение.
+        foreach ($inItems as $key => $value) {
+            if (preg_match($file_reg_exp, $value->filename) != 1) {
+                unset ($inItems[$key]);
+            }
+        }
+
+        $outItems = DB::table('checks')
+            ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get()
+            ->toArray();
+
+
+        // Удаляем все титулы, не подходящие под регулярное выражение.
+        foreach ($outItems as $key => $value) {
+            if (preg_match($file_reg_exp, $value->filename) != 1) {
+                unset ($outItems[$key]);
+            }
+        }
+
+        // Ищем только записи, в которые проверены файлы user_id
+        $userFileList = [];
+        foreach ($outItems as $key => $value) {
+            if ($value->owner == $user_id) { // если запись принадлежит user_id
+
+                // это запись на проверку и ее нет в листе, добавляем в лист
+                if ($value->status == 0 && !array_key_exists($value->filename, $userFileList)) {
+                    $userFileList[] = $value->filename;
+                }
+
+                unset ($outItems[$key]);
+
+            } else { // если запись не принадлежит user_id
+
+                // если такого файла нет в листе, удаляем
+                // если есть и другой пользователь добавил тот же файл на проверку, удаляем
+                // в остальных случаях - оставляем
+                if (array_key_exists($value->filename, $userFileList)) {
+                    if ($value->status == 0) {
+                        unset ($userFileList[$value->filename]);
+                        unset ($outItems[$key]);
+                    }
+                } else {
+                    unset ($outItems[$key]);
+                }
+
+
+            }
+        }
+
+
+        return Feedback::getFeedback(0, [
+            'items' => [
+
+                "in" => [
+                    "drawings" => $this->divideItemsByIntervalUsingCount($inItems, $startDate, $endDate, $interval),
+                    "mistakes" => $this->divideItemsByIntervalUsingValue($inItems, $startDate, $endDate, $interval, 'mistake_count')
+                ],
+
+                "out" => [
+                    "drawings" => $this->divideItemsByIntervalUsingCount($outItems, $startDate, $endDate, $interval),
+                    "mistakes" => $this->divideItemsByIntervalUsingValue($outItems, $startDate, $endDate, $interval, 'mistake_count')
+                ],
+
+            ]
+
+
+        ]);
     }
 
 
