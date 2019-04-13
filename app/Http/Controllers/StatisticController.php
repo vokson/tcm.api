@@ -509,15 +509,23 @@ class StatisticController extends Controller
 
         // Ищем только записи, в которые проверены файлы user_id
         $userFileList = [];
+        $outItemsCreatedByUser = [];
+//        $log = [];
+
         foreach ($outItems as $key => $value) {
+//            $s = $value->filename . ' | ' . $value->owner . ' | ' . $value->status . ' => ';
+
             if ($value->owner == $user_id) { // если запись принадлежит user_id
 
                 // это запись на проверку и ее нет в листе, добавляем в лист
                 if ($value->status == 0 && !array_key_exists($value->filename, $userFileList)) {
-                    $userFileList[] = $value->filename;
+                    $userFileList[$value->filename] = true;
+                    $outItemsCreatedByUser[] = $value;
+//                    $s .= ' ADD LIST';
                 }
 
                 unset ($outItems[$key]);
+//                $s .= ' DELETED';
 
             } else { // если запись не принадлежит user_id
 
@@ -525,16 +533,24 @@ class StatisticController extends Controller
                 // если есть и другой пользователь добавил тот же файл на проверку, удаляем
                 // в остальных случаях - оставляем
                 if (array_key_exists($value->filename, $userFileList)) {
+//                    $s .= ' EXIST';
                     if ($value->status == 0) {
                         unset ($userFileList[$value->filename]);
+//                        $s .= ' DELETE LIST';
                         unset ($outItems[$key]);
+//                        $s .= ' DELETED';
                     }
+//                    $s .= ' KEPT';
                 } else {
+//                    $s .= ' NOT EXIST';
                     unset ($outItems[$key]);
+//                    $s .= ' DELETED';
                 }
 
 
             }
+
+//            $log[] = $s;
         }
 
 
@@ -547,9 +563,11 @@ class StatisticController extends Controller
                 ],
 
                 "out" => [
-                    "drawings" => $this->divideItemsByIntervalUsingCount($outItems, $startDate, $endDate, $interval),
+                    "drawings" => $this->divideItemsByIntervalUsingCount($outItemsCreatedByUser, $startDate, $endDate, $interval),
                     "mistakes" => $this->divideItemsByIntervalUsingValue($outItems, $startDate, $endDate, $interval, 'mistake_count')
                 ],
+
+//                'log' => $log
 
             ]
 
