@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Status;
-use App\TitleHistoryRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
 use Illuminate\Support\Facades\DB;
 use DateTime;
+use App\Check;
 
 class StatisticController extends Controller
 {
@@ -478,22 +477,7 @@ class StatisticController extends Controller
         $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
         $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
 
-        $inItems = DB::table('checks')
-            ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('owner', $user_id)
-            ->get()
-            ->toArray();
-
-
-        // Удаляем все титулы, не подходящие под регулярное выражение.
-        foreach ($inItems as $key => $value) {
-            if (preg_match($file_reg_exp, $value->filename) != 1) {
-                unset ($inItems[$key]);
-            }
-        }
-
-        $outItems = DB::table('checks')
+        $items = DB::table('checks')
             ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
@@ -501,31 +485,46 @@ class StatisticController extends Controller
 
 
         // Удаляем все титулы, не подходящие под регулярное выражение.
-        foreach ($outItems as $key => $value) {
+        foreach ($items as $key => $value) {
             if (preg_match($file_reg_exp, $value->filename) != 1) {
-                unset ($outItems[$key]);
+                unset ($items[$key]);
             }
         }
 
-        // Ищем только записи, в которые проверены файлы user_id
         $userFileList = [];
-        $outItemsCreatedByUser = [];
-//        $log = [];
+        $itemsPreparedByUser = [];
+        $itemsCheckedByUser = [];
+        $itemsCheckedByOthers = [];
+        $distributionOfDrawingsCheckedByUser = [];
+        $distributionOfDrawingsCheckedByOthers = [];
 
-        foreach ($outItems as $key => $value) {
-//            $s = $value->filename . ' | ' . $value->owner . ' | ' . $value->status . ' => ';
+        foreach ($items as $key => $value) {
 
             if ($value->owner == $user_id) { // если запись принадлежит user_id
 
                 // это запись на проверку и ее нет в листе, добавляем в лист
                 if ($value->status == 0 && !array_key_exists($value->filename, $userFileList)) {
                     $userFileList[$value->filename] = true;
-                    $outItemsCreatedByUser[] = $value;
-//                    $s .= ' ADD LIST';
+                    $itemsPreparedByUser[] = $value;
                 }
 
-                unset ($outItems[$key]);
-//                $s .= ' DELETED';
+                // Пользователь проверил чужой лист
+                if ($value->status != 0) {
+                    $itemsCheckedByUser[] = $value;
+
+                    // ищем собственника файла
+                    $ownerRecord = Check::where('filename', $value->filename)
+                        ->where('status', 0)->orderBy('created_at', 'desc')->first();
+
+                    // считаем распределение по пользователям
+                    if ($ownerRecord != null) {
+                        if (isset($distributionOfDrawingsCheckedByUser[$ownerRecord->owner])) {
+                            $distributionOfDrawingsCheckedByUser[$ownerRecord->owner] += 1;
+                        } else {
+                            $distributionOfDrawingsCheckedByUser[$ownerRecord->owner] = 1;
+                        }
+                    }
+                }
 
             } else { // если запись не принадлежит user_id
 
@@ -533,24 +532,24 @@ class StatisticController extends Controller
                 // если есть и другой пользователь добавил тот же файл на проверку, удаляем
                 // в остальных случаях - оставляем
                 if (array_key_exists($value->filename, $userFileList)) {
-//                    $s .= ' EXIST';
                     if ($value->status == 0) {
                         unset ($userFileList[$value->filename]);
-//                        $s .= ' DELETE LIST';
-                        unset ($outItems[$key]);
-//                        $s .= ' DELETED';
+                    } else {
+                        // чертеж пользователя проверен другими
+                        $itemsCheckedByOthers[] = $value;
+                        // считаем распределение по пользователям
+                        if (isset($distributionOfDrawingsCheckedByOthers[$value->owner])) {
+                            $distributionOfDrawingsCheckedByOthers[$value->owner] += 1;
+                        } else {
+                            $distributionOfDrawingsCheckedByOthers[$value->owner] = 1;
+                        }
                     }
-//                    $s .= ' KEPT';
-                } else {
-//                    $s .= ' NOT EXIST';
-                    unset ($outItems[$key]);
-//                    $s .= ' DELETED';
                 }
-
 
             }
 
-//            $log[] = $s;
+            unset($items);
+
         }
 
 
@@ -558,13 +557,22 @@ class StatisticController extends Controller
             'items' => [
 
                 "in" => [
-                    "drawings" => $this->divideItemsByIntervalUsingCount($inItems, $startDate, $endDate, $interval),
-                    "mistakes" => $this->divideItemsByIntervalUsingValue($inItems, $startDate, $endDate, $interval, 'mistake_count')
+                    "drawings" => $this->divideItemsByIntervalUsingCount($itemsCheckedByUser, $startDate, $endDate, $interval),
+                    "mistakes" => $this->divideItemsByIntervalUsingValue($itemsCheckedByUser, $startDate, $endDate, $interval, 'mistake_count'),
+                    "distribution" => [
+                        "labels" => array_keys($distributionOfDrawingsCheckedByUser),
+                        "values" => array_values($distributionOfDrawingsCheckedByUser)
+                    ]
+
                 ],
 
                 "out" => [
-                    "drawings" => $this->divideItemsByIntervalUsingCount($outItemsCreatedByUser, $startDate, $endDate, $interval),
-                    "mistakes" => $this->divideItemsByIntervalUsingValue($outItems, $startDate, $endDate, $interval, 'mistake_count')
+                    "drawings" => $this->divideItemsByIntervalUsingCount($itemsPreparedByUser, $startDate, $endDate, $interval),
+                    "mistakes" => $this->divideItemsByIntervalUsingValue($itemsCheckedByOthers, $startDate, $endDate, $interval, 'mistake_count'),
+                    "distribution" => [
+                        "labels" => array_keys($distributionOfDrawingsCheckedByOthers),
+                        "values" => array_values($distributionOfDrawingsCheckedByOthers)
+                    ]
                 ],
 
 //                'log' => $log
