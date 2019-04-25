@@ -575,12 +575,41 @@ class StatisticController extends Controller
                     ]
                 ],
 
-//                'log' => $log
+                'mistakes' => $this->getCountOfMistakesByProbability(0.95)
 
             ]
 
 
         ]);
+    }
+
+    public function getCountOfMistakesByProbability($probability)
+    {
+        $items = DB::table('checks')
+            ->select('status', 'mistake_count')
+            ->where('status',-1)
+            ->get()
+            ->toArray();
+
+        $mistakes = [];
+        foreach ($items as $key => $value) {
+            $mistakes[] = $value->mistake_count;
+        }
+
+        $distribution = array_count_values($mistakes);
+        ksort($distribution, SORT_NUMERIC);
+
+        $sum = array_sum($distribution);
+
+        $cumulativeProbability = 0;
+        foreach ($distribution as $key => $value) {
+           $cumulativeProbability += $value/$sum;
+
+           if ($cumulativeProbability >= $probability) {
+               return $value;
+           }
+        }
+
     }
 
 
