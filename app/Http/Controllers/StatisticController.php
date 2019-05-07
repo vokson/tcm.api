@@ -583,11 +583,11 @@ class StatisticController extends Controller
         ]);
     }
 
-    public function getCountOfMistakesByProbability($probability)
+    public static function getCountOfMistakesByProbability($probability)
     {
         $items = DB::table('checks')
             ->select('status', 'mistake_count')
-            ->where('status',-1)
+            ->where('status', -1)
             ->get()
             ->toArray();
 
@@ -599,15 +599,19 @@ class StatisticController extends Controller
         $distribution = array_count_values($mistakes);
         ksort($distribution, SORT_NUMERIC);
 
+//        foreach ($distribution as $key => $value) {
+//            echo $key . ' => ' . $value . "\n";
+//        }
+
         $sum = array_sum($distribution);
 
         $cumulativeProbability = 0;
         foreach ($distribution as $key => $value) {
-           $cumulativeProbability += $value/$sum;
+            $cumulativeProbability += $value / $sum;
 
-           if ($cumulativeProbability >= $probability) {
-               return $value;
-           }
+            if ($cumulativeProbability >= $probability) {
+                return $key;
+            }
         }
 
     }

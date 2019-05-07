@@ -35,6 +35,26 @@ class SettingsController extends Controller
 
     }
 
+    public static function save($name, $value)
+    {
+
+        $parameter = Setting::where('name', $name)->first();
+
+        if ($parameter) {
+
+            $parameter->fill([
+                'name' => $name,
+                'value' => $value
+            ]);
+
+            return $parameter->save();
+
+        } else {
+
+            return false;
+        }
+    }
+
     public function set(Request $request)
     {
 
@@ -55,23 +75,9 @@ class SettingsController extends Controller
             $name = $item['name'];
             $value = $item['value'];
 
-            $parameter = Setting::where('name', $name)->first();
-
-            if ($parameter) {
-
-                $parameter->fill([
-                    'name' => $name,
-                    'value' => $value
-                ]);
-
-                $parameter->save();
-
-
-            } else {
-
+            if (!self::save($name, $value)) {
                 return Feedback::getFeedback(201);
             }
-
 
         }
 
