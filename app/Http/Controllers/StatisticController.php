@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use DateTime;
 use App\Check;
 
+use App\Http\Controllers\SettingsController as Settings;
+
 class StatisticController extends Controller
 {
 
@@ -575,8 +577,6 @@ class StatisticController extends Controller
                     ]
                 ],
 
-                'mistakes' => $this->getCountOfMistakesByProbability(0.95)
-
             ]
 
 
@@ -613,6 +613,107 @@ class StatisticController extends Controller
                 return $key;
             }
         }
+
+    }
+
+    public function getCheckerRatingForUser(Request $request)
+    {
+        $user_id = intval((Input::get('user_id', 0)));
+
+        $items = DB::table('checks')
+            ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
+            ->get()
+            ->toArray();
+
+        $userFileList = [];
+
+        $countOfDocumentsApprovedFromFirstTime = 0;
+        $countOfDocumentsPreparedForChecking = 0;
+        $arrayOfMistakes = [];
+
+        foreach ($items as $key => $value) {
+
+            if ($value->owner == $user_id) { // если запись принадлежит user_id
+
+                // это запись на проверку и ее нет в листе, добавляем в лист
+                if ($value->status == 0 && !array_key_exists($value->filename, $userFileList)) {
+                    $userFileList[$value->filename] = false; // false - проверки не было
+                    $countOfDocumentsPreparedForChecking++;
+                }
+
+            } else { // если запись не принадлежит user_id
+
+                // если такого файла нет в листе, удаляем
+                // если есть и другой пользователь добавил тот же файл на проверку, удаляем
+                // в остальных случаях - оставляем
+                if (array_key_exists($value->filename, $userFileList)) {
+                    if ($value->status == 0) {
+                        unset ($userFileList[$value->filename]);
+                    } else {
+                        // чертеж пользователя проверен другими и есть ошибки
+                        if ($value->status == -1) {
+                            $arrayOfMistakes[] = $value->mistake_count;
+                        }
+
+                        //если ошибок нет при первой проверке
+                        if ($value->status == 1 && $userFileList[$value->filename] == false) {
+                            $countOfDocumentsApprovedFromFirstTime++;
+                        }
+
+                        $userFileList[$value->filename] = true;
+                    }
+                }
+
+            }
+
+            unset($items);
+
+        }
+
+        $maxMistakeCount = Settings::take('RATING_MISTAKE_COUNT');
+
+        $arrayOfMarks = [];
+        foreach ($arrayOfMistakes as $countOfMistake) {
+            $arrayOfMarks[] = ($countOfMistake >= $maxMistakeCount) ? 1.0 : ($countOfMistake / $maxMistakeCount);
+        }
+
+        $positiveRating = ($countOfDocumentsPreparedForChecking == 0) ? 0 : ($countOfDocumentsApprovedFromFirstTime / $countOfDocumentsPreparedForChecking);
+
+        if (count($arrayOfMarks) > 0) {
+
+            $negativeRating = $this->calculateNegativeRating(
+                array_sum($arrayOfMarks) / count($arrayOfMarks),
+                Settings::take('RATING_INITIAL_VALUE'),
+                count($arrayOfMarks)
+            );
+
+        } else {
+            $negativeRating = 0;
+        }
+
+
+        return Feedback::getFeedback(0, [
+            'items' => [
+
+                "countOfDocumentsPreparedForChecking" => $countOfDocumentsPreparedForChecking,
+                "countOfDocumentsApprovedFromFirstTime" => $countOfDocumentsApprovedFromFirstTime,
+                "arrayOfMistakes" => $arrayOfMistakes,
+                "positiveRating" => $positiveRating,
+                "arrayOfMarks" => $arrayOfMarks,
+                "negativeRating" => $negativeRating
+            ]
+
+
+        ]);
+
+    }
+
+    private function calculateNegativeRating($Ru, $Rq, $k)
+    {
+        // Механизм расчета рейтинга взят
+        // https://yandex.ru/support/partnermarket/calculate.html
+
+        return $Ru - ($Ru - $Rq) / (($k + 1) ^ ($k * 0.02 / ($Ru + 0.1)));
 
     }
 

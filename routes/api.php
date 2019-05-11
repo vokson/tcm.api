@@ -128,6 +128,9 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/merge/pdf/file/upload', 'MergePdfController@upload');
         Route::post('/merge/pdf/file/download', 'MergePdfController@download');
 
+        //RATING
+        Route::post('/checker/rating/get', 'StatisticController@getCheckerRatingForUser');
+
 
     });
 
