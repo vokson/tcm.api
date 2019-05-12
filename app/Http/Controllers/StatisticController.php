@@ -619,9 +619,16 @@ class StatisticController extends Controller
     public function getCheckerRatingForUser(Request $request)
     {
         $user_id = intval((Input::get('user_id', 0)));
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval((Input::get('date2', '')));
+
+        //DATE
+        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
+        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
 
         $items = DB::table('checks')
             ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
             ->toArray();
 
@@ -695,11 +702,11 @@ class StatisticController extends Controller
         return Feedback::getFeedback(0, [
             'items' => [
 
-                "countOfDocumentsPreparedForChecking" => $countOfDocumentsPreparedForChecking,
-                "countOfDocumentsApprovedFromFirstTime" => $countOfDocumentsApprovedFromFirstTime,
-                "arrayOfMistakes" => $arrayOfMistakes,
+//                "countOfDocumentsPreparedForChecking" => $countOfDocumentsPreparedForChecking,
+//                "countOfDocumentsApprovedFromFirstTime" => $countOfDocumentsApprovedFromFirstTime,
+//                "arrayOfMistakes" => $arrayOfMistakes,
                 "positiveRating" => $positiveRating,
-                "arrayOfMarks" => $arrayOfMarks,
+//                "arrayOfMarks" => $arrayOfMarks,
                 "negativeRating" => $negativeRating
             ]
 
