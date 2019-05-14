@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ApiUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
@@ -616,16 +617,8 @@ class StatisticController extends Controller
 
     }
 
-    public function getCheckerRatingForUser(Request $request)
+    private function getCheckerRatingForUser($user_id, $startDate, $endDate)
     {
-        $user_id = intval((Input::get('user_id', 0)));
-        $date1 = intval(trim(Input::get('date1', '')));
-        $date2 = intval((Input::get('date2', '')));
-
-        //DATE
-        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
-        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
-
         $items = DB::table('checks')
             ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -699,19 +692,7 @@ class StatisticController extends Controller
         }
 
 
-        return Feedback::getFeedback(0, [
-            'items' => [
-
-//                "countOfDocumentsPreparedForChecking" => $countOfDocumentsPreparedForChecking,
-//                "countOfDocumentsApprovedFromFirstTime" => $countOfDocumentsApprovedFromFirstTime,
-//                "arrayOfMistakes" => $arrayOfMistakes,
-                "positiveRating" => $positiveRating,
-//                "arrayOfMarks" => $arrayOfMarks,
-                "negativeRating" => $negativeRating
-            ]
-
-
-        ]);
+        return [$positiveRating, $negativeRating];
 
     }
 
@@ -721,6 +702,38 @@ class StatisticController extends Controller
         // https://yandex.ru/support/partnermarket/calculate.html
 
         return $Ru - ($Ru - $Rq) / (($k + 1) ^ ($k * 0.02 / ($Ru + 0.1)));
+
+    }
+
+    public function getItemsForCheckerRatingChart(Request $request)
+    {
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval((Input::get('date2', '')));
+
+        //DATE
+        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
+        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
+
+        $users = ApiUser::orderBy('surname', 'asc')->orderBy('name', 'asc')->get();
+        $items = [];
+
+        foreach ($users as $user) {
+            if ($user->active == 1) {
+                [$positiveRating, $negativeRating] = $this->getCheckerRatingForUser($user->id, $startDate, $endDate);
+
+                if ($positiveRating != 0 && $negativeRating != 0) {
+                    $items[] = [
+                        'owner' => $user->surname . ' ' . $user->name,
+                        'positiveRating' => $positiveRating,
+                        'negativeRating' => $negativeRating
+                    ];
+                }
+            }
+        }
+
+        return Feedback::getFeedback(0, [
+            'items' => $items
+        ]);
 
     }
 
