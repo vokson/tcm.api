@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Status;
-use App\TitleHistoryRecord;
+use App\ApiUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
 use Illuminate\Support\Facades\DB;
 use DateTime;
+use App\Check;
+
+use App\Http\Controllers\SettingsController as Settings;
 
 class StatisticController extends Controller
 {
@@ -159,17 +161,17 @@ class StatisticController extends Controller
         $items = $items->toArray();
 
         return Feedback::getFeedback(0, [
-            'items' => $this->divideItemsByIntervalUsingSize($items, $startDate, $endDate, $interval)
+            'items' => $this->divideItemsByIntervalUsingValue($items, $startDate, $endDate, $interval, 'size')
         ]);
     }
 
-    private function divideItemsByIntervalUsingSize($items, $startDate, $endDate, $interval)
+    private function divideItemsByIntervalUsingValue($items, $startDate, $endDate, $interval, $nameOfValue)
     {
 
         $items = array_values($items);
         $countOfIntervals = intdiv(intval($endDate) - intval($startDate), $interval);
 
-        $size = 0;
+        $value = 0;
         $i = 0;
 
         $labels = [];
@@ -181,13 +183,13 @@ class StatisticController extends Controller
                 ($i < count($items)) &&
                 ($items[$i]->created_at < (intval($startDate) + $n * $interval))
             ) {
-                $size += $items[$i]->size;
+                $value += $items[$i]->$nameOfValue;
                 $i++;
             }
 
             $labels[] = intval($startDate) + ($n - 1) * $interval;
-            $values[] = $size;
-            $size = 0;
+            $values[] = $value;
+            $value = 0;
 
         }
 
@@ -196,12 +198,12 @@ class StatisticController extends Controller
         if ((intval($startDate) + ($n - 1) * $interval) < intval($endDate)) {
             $labels[] = intval($startDate) + ($n - 1) * $interval;
 
-            $size = 0;
+            $value = 0;
             for ($k = $i; $k < count($items); $k++) {
-                $size += $items[$k]->size;
+                $value += $items[$k]->$nameOfValue;
             }
 
-            $values[] = $size;
+            $values[] = $value;
         }
 
         $arr['labels'] = $labels;
@@ -463,6 +465,275 @@ class StatisticController extends Controller
             ->first();
 
         return ($item === null) ? null : $item->created_at;
+
+    }
+
+    public function getItemsForCheckedDrawingsChart(Request $request)
+    {
+        $interval = intval(trim(Input::get('interval', '')));
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval((Input::get('date2', '')));
+        $user_id = intval((Input::get('user_id', 0)));
+        $file_reg_exp = trim(Input::get('file_regular_expression', ''));
+
+        //DATE
+        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
+        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
+
+        $items = DB::table('checks')
+            ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get()
+            ->toArray();
+
+
+        // Удаляем все титулы, не подходящие под регулярное выражение.
+        foreach ($items as $key => $value) {
+            if (preg_match($file_reg_exp, $value->filename) != 1) {
+                unset ($items[$key]);
+            }
+        }
+
+        $userFileList = [];
+        $itemsPreparedByUser = [];
+        $itemsCheckedByUser = [];
+        $itemsCheckedByOthers = [];
+        $distributionOfDrawingsCheckedByUser = [];
+        $distributionOfDrawingsCheckedByOthers = [];
+
+        foreach ($items as $key => $value) {
+
+            if ($value->owner == $user_id) { // если запись принадлежит user_id
+
+                // это запись на проверку и ее нет в листе, добавляем в лист
+                if ($value->status == 0 && !array_key_exists($value->filename, $userFileList)) {
+                    $userFileList[$value->filename] = true;
+                    $itemsPreparedByUser[] = $value;
+                }
+
+                // Пользователь проверил чужой лист
+                if ($value->status != 0) {
+                    $itemsCheckedByUser[] = $value;
+
+                    // ищем собственника файла
+                    $ownerRecord = Check::where('filename', $value->filename)
+                        ->where('status', 0)->orderBy('created_at', 'desc')->first();
+
+                    // считаем распределение по пользователям
+                    if ($ownerRecord != null) {
+                        if (isset($distributionOfDrawingsCheckedByUser[$ownerRecord->owner])) {
+                            $distributionOfDrawingsCheckedByUser[$ownerRecord->owner] += 1;
+                        } else {
+                            $distributionOfDrawingsCheckedByUser[$ownerRecord->owner] = 1;
+                        }
+                    }
+                }
+
+            } else { // если запись не принадлежит user_id
+
+                // если такого файла нет в листе, удаляем
+                // если есть и другой пользователь добавил тот же файл на проверку, удаляем
+                // в остальных случаях - оставляем
+                if (array_key_exists($value->filename, $userFileList)) {
+                    if ($value->status == 0) {
+                        unset ($userFileList[$value->filename]);
+                    } else {
+                        // чертеж пользователя проверен другими
+                        $itemsCheckedByOthers[] = $value;
+                        // считаем распределение по пользователям
+                        if (isset($distributionOfDrawingsCheckedByOthers[$value->owner])) {
+                            $distributionOfDrawingsCheckedByOthers[$value->owner] += 1;
+                        } else {
+                            $distributionOfDrawingsCheckedByOthers[$value->owner] = 1;
+                        }
+                    }
+                }
+
+            }
+
+            unset($items);
+
+        }
+
+
+        return Feedback::getFeedback(0, [
+            'items' => [
+
+                "in" => [
+                    "drawings" => $this->divideItemsByIntervalUsingCount($itemsCheckedByUser, $startDate, $endDate, $interval),
+                    "mistakes" => $this->divideItemsByIntervalUsingValue($itemsCheckedByUser, $startDate, $endDate, $interval, 'mistake_count'),
+                    "distribution" => [
+                        "labels" => array_keys($distributionOfDrawingsCheckedByUser),
+                        "values" => array_values($distributionOfDrawingsCheckedByUser)
+                    ]
+
+                ],
+
+                "out" => [
+                    "drawings" => $this->divideItemsByIntervalUsingCount($itemsPreparedByUser, $startDate, $endDate, $interval),
+                    "mistakes" => $this->divideItemsByIntervalUsingValue($itemsCheckedByOthers, $startDate, $endDate, $interval, 'mistake_count'),
+                    "distribution" => [
+                        "labels" => array_keys($distributionOfDrawingsCheckedByOthers),
+                        "values" => array_values($distributionOfDrawingsCheckedByOthers)
+                    ]
+                ],
+
+            ]
+
+
+        ]);
+    }
+
+    public static function getCountOfMistakesByProbability($probability)
+    {
+        $items = DB::table('checks')
+            ->select('status', 'mistake_count')
+            ->where('status', -1)
+            ->get()
+            ->toArray();
+
+        $mistakes = [];
+        foreach ($items as $key => $value) {
+            $mistakes[] = $value->mistake_count;
+        }
+
+        $distribution = array_count_values($mistakes);
+        ksort($distribution, SORT_NUMERIC);
+
+//        foreach ($distribution as $key => $value) {
+//            echo $key . ' => ' . $value . "\n";
+//        }
+
+        $sum = array_sum($distribution);
+
+        $cumulativeProbability = 0;
+        foreach ($distribution as $key => $value) {
+            $cumulativeProbability += $value / $sum;
+
+            if ($cumulativeProbability >= $probability) {
+                return $key;
+            }
+        }
+
+    }
+
+    private function getCheckerRatingForUser($user_id, $startDate, $endDate)
+    {
+        $items = DB::table('checks')
+            ->select('id', 'filename', 'status', 'mistake_count', 'owner', 'created_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get()
+            ->toArray();
+
+        $userFileList = [];
+
+        $countOfDocumentsApprovedFromFirstTime = 0;
+        $countOfDocumentsPreparedForChecking = 0;
+        $arrayOfMistakes = [];
+
+        foreach ($items as $key => $value) {
+
+            if ($value->owner == $user_id) { // если запись принадлежит user_id
+
+                // это запись на проверку и ее нет в листе, добавляем в лист
+                if ($value->status == 0 && !array_key_exists($value->filename, $userFileList)) {
+                    $userFileList[$value->filename] = false; // false - проверки не было
+                    $countOfDocumentsPreparedForChecking++;
+                }
+
+            } else { // если запись не принадлежит user_id
+
+                // если такого файла нет в листе, удаляем
+                // если есть и другой пользователь добавил тот же файл на проверку, удаляем
+                // в остальных случаях - оставляем
+                if (array_key_exists($value->filename, $userFileList)) {
+                    if ($value->status == 0) {
+                        unset ($userFileList[$value->filename]);
+                    } else {
+                        // чертеж пользователя проверен другими и есть ошибки
+                        if ($value->status == -1) {
+                            $arrayOfMistakes[] = $value->mistake_count;
+                        }
+
+                        //если ошибок нет при первой проверке
+                        if ($value->status == 1 && $userFileList[$value->filename] == false) {
+                            $countOfDocumentsApprovedFromFirstTime++;
+                        }
+
+                        $userFileList[$value->filename] = true;
+                    }
+                }
+
+            }
+
+            unset($items);
+
+        }
+
+        $maxMistakeCount = Settings::take('RATING_MISTAKE_COUNT');
+
+        $arrayOfMarks = [];
+        foreach ($arrayOfMistakes as $countOfMistake) {
+            $arrayOfMarks[] = ($countOfMistake >= $maxMistakeCount) ? 1.0 : ($countOfMistake / $maxMistakeCount);
+        }
+
+        $positiveRating = ($countOfDocumentsPreparedForChecking == 0) ? 0 : ($countOfDocumentsApprovedFromFirstTime / $countOfDocumentsPreparedForChecking);
+
+        if (count($arrayOfMarks) > 0) {
+
+            $negativeRating = $this->calculateNegativeRating(
+                array_sum($arrayOfMarks) / count($arrayOfMarks),
+                Settings::take('RATING_INITIAL_VALUE'),
+                count($arrayOfMarks)
+            );
+
+        } else {
+            $negativeRating = 0;
+        }
+
+
+        return [$positiveRating, $negativeRating];
+
+    }
+
+    private function calculateNegativeRating($Ru, $Rq, $k)
+    {
+        // Механизм расчета рейтинга взят
+        // https://yandex.ru/support/partnermarket/calculate.html
+
+        return $Ru - ($Ru - $Rq) / (($k + 1) ^ ($k * 0.02 / ($Ru + 0.1)));
+
+    }
+
+    public function getItemsForCheckerRatingChart(Request $request)
+    {
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval((Input::get('date2', '')));
+
+        //DATE
+        $startDate = DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U');
+        $endDate = DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U');
+
+        $users = ApiUser::orderBy('surname', 'asc')->orderBy('name', 'asc')->get();
+        $items = [];
+
+        foreach ($users as $user) {
+            if ($user->active == 1) {
+                [$positiveRating, $negativeRating] = $this->getCheckerRatingForUser($user->id, $startDate, $endDate);
+
+                if ($positiveRating != 0 && $negativeRating != 0) {
+                    $items[] = [
+                        'owner' => $user->surname . ' ' . $user->name,
+                        'positiveRating' => $positiveRating,
+                        'negativeRating' => $negativeRating
+                    ];
+                }
+            }
+        }
+
+        return Feedback::getFeedback(0, [
+            'items' => $items
+        ]);
 
     }
 

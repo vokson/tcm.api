@@ -89,6 +89,7 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/charts/titles/status/get', 'StatisticController@getItemsForTitleStatusChart');
         Route::post('/charts/tq/status/get', 'StatisticController@getItemsForTqStatus');
         Route::post('charts/storage/get', 'StatisticController@getItemsForStorageChart');
+        Route::post('charts/checked/drawings/get', 'StatisticController@getItemsForCheckedDrawingsChart');
 
         // CHECK FILES
         Route::post('/checker/file/upload', 'CheckedFileController@upload');
@@ -126,6 +127,9 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/merge/pdf/set/main/name', 'MergePdfController@setMainName');
         Route::post('/merge/pdf/file/upload', 'MergePdfController@upload');
         Route::post('/merge/pdf/file/download', 'MergePdfController@download');
+
+        //RATING
+        Route::post('/checker/rating/get', 'StatisticController@getItemsForCheckerRatingChart');
 
 
     });
