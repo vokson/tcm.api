@@ -206,8 +206,8 @@ class MergePdfController extends Controller
         $headers = array(
             'Content-Type' => 'application/octet-stream',
             'Access-Control-Expose-Headers' => 'Content-Filename',
-//            'Content-Filename' => $this->getMainNameOfMergedPdfForUser(ApiAuthController::id($request))
-            'Content-Filename' => storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile
+            'Content-Filename' => $this->getMainNameOfMergedPdfForUser(ApiAuthController::id($request))
+//            'Content-Filename' => storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile
         );
 
         return response()->download(storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile, "", $headers);
