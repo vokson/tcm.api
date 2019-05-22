@@ -194,6 +194,9 @@ class MergePdfController extends Controller
         $result = null;
         exec($command_string, $output, $result);
 
+        //LOG
+        file_put_contents(str_replace('.pdf', '.txt', $pathOfMergedFile),print_r($output, true));
+
         if (!file_exists(storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile)) {
             return Feedback::getFeedback(610, [
                 'command' => $command_string,
