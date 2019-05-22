@@ -203,7 +203,9 @@ class MergePdfController extends Controller
                 'command' => $command_string,
                 'result' => $result,
                 'output' => $output,
-                'path' => storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile
+                'path' => storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile,
+                'is_exist' => file_exists(storage_path('app') . DIRECTORY_SEPARATOR . $pathOfMergedFile)
+
             ], true)
         );
 
