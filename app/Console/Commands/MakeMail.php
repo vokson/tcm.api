@@ -2,9 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\SenderFolder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\TestMail;
+use App\Mail\SenderCreateFolderNotification;
 
 class MakeMail extends Command
 {
@@ -40,9 +41,7 @@ class MakeMail extends Command
     public function handle()
     {
         Mail::to('noskov_as@niik.ru')
-//            ->cc($moreUsers)
-//            ->bcc($evenMoreUsers)
-            ->send(new TestMail());
+            ->send(new SenderCreateFolderNotification(SenderFolder::find(243)));
     }
 
 }

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\SenderCreateFolderNotification;
+
 
 class SenderFolderController extends Controller
 {
@@ -67,6 +69,12 @@ class SenderFolderController extends Controller
 
         $folder->is_ready = ($folder->is_ready == 1) ? 0: 1;
         $folder->save();
+
+        if ($folder->is_ready == 1) {
+            Mail::to('noskov_as@niik.ru')
+                ->send(new SenderCreateFolderNotification($folder));
+
+        }
 
         return Feedback::getFeedback(0);
     }

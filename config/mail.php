@@ -84,9 +84,9 @@ return [
     |
     */
 
-    'username' => env('user'),
+    'username' => env('MAIL_USERNAME'),
 
-    'password' => env('password'),
+    'password' => env('MAIL_PASSWORD'),
 
     /*
     |--------------------------------------------------------------------------
@@ -119,13 +119,5 @@ return [
             resource_path('views/vendor/mail'),
         ],
     ],
-
-    'stream' => [
-        'ssl' => [
-            'allow_self_signed' => true,
-            'verify_peer' => false,
-            'verify_peer_name' => false,
-        ],
-    ]
 
 ];
