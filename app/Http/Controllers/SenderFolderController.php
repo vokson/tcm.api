@@ -51,7 +51,7 @@ class SenderFolderController extends Controller
         $files = SenderFile::where('folder', $folder_id)->get();
 
         foreach ($files as $file) {
-            if ( (Storage::delete($file->server_name) === false) || ($file->delete() === false)) {
+            if ((Storage::delete($file->server_name) === false) || ($file->delete() === false)) {
                 return Feedback::getFeedback(603);
             }
         }
@@ -59,7 +59,7 @@ class SenderFolderController extends Controller
         return (SenderFolder::destroy($folder_id)) ? Feedback::getFeedback(0) : Feedback::getFeedback(901);
     }
 
-    function switch(Request $request)
+    function switch (Request $request)
     {
         $id = intval(Input::get('id', 0));
         $folder = SenderFolder::find($id);
@@ -68,15 +68,12 @@ class SenderFolderController extends Controller
             return Feedback::getFeedback(901);
         }
 
-        $folder->is_ready = ($folder->is_ready == 1) ? 0: 1;
+        $folder->is_ready = ($folder->is_ready == 1) ? 0 : 1;
         $folder->save();
 
-        if ($folder->is_ready == 1) {
-            Mail::to('noskov_as@niik.ru')
-                ->send(new SenderCreateFolderNotification($folder));
-
-        }
-
+        Mail::to('noskov_as@niik.ru')
+            ->send(new SenderCreateFolderNotification($folder));
+        
         return Feedback::getFeedback(0);
     }
 
