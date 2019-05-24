@@ -10,6 +10,7 @@ use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\SenderCreateFolderNotification;
+use Illuminate\Support\Facades\Mail;
 
 
 class SenderFolderController extends Controller
