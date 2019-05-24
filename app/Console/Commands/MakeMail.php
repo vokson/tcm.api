@@ -41,7 +41,7 @@ class MakeMail extends Command
     public function handle()
     {
         Mail::to('noskov_as@niik.ru')
-            ->send(new SenderCreateFolderNotification(SenderFolder::find(243)));
+            ->send(new SenderCreateFolderNotification(SenderFolder::find(419)));
     }
 
 }
