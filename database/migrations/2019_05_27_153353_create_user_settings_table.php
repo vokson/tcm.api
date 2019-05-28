@@ -21,6 +21,7 @@ class CreateUserSettingsTable extends Migration
                 ->references('id')->on('api_users')->onDelete('restrict');
             $table->string('name');
             $table->string('value');
+            $table->boolean('is_switchable')->nullable();
             $table->timestamps();
         });
     }
