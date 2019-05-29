@@ -22,6 +22,8 @@ class CreateUserSettingsTable extends Migration
             $table->string('name');
             $table->string('value');
             $table->boolean('is_switchable')->nullable();
+            $table->string('description_RUS')->nullable();
+            $table->string('description_ENG')->nullable();
             $table->timestamps();
         });
     }

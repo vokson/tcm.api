@@ -9,10 +9,7 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Mail\SenderCreateFolderNotification;
-use Illuminate\Support\Facades\Mail;
-use DateTime;
-use DateInterval;
+use App\Http\Controllers\MailController;
 
 
 class SenderFolderController extends Controller
@@ -73,11 +70,7 @@ class SenderFolderController extends Controller
         $folder->is_ready = ($folder->is_ready == 1) ? 0 : 1;
         $folder->save();
 
-//        $timeForSending = new DateTime('NOW');
-//        $timeForSending->add(new DateInterval('PT1M'));
-
-        Mail::to('noskov_as@niik.ru')
-            ->queue(new SenderCreateFolderNotification($folder));
+        MailController::sendNotification('SEND_NOTIFICATION_FROM_SENDER', $folder);
 
         return Feedback::getFeedback(0);
     }

@@ -40,7 +40,13 @@ class UserSettingsController extends Controller
 
         foreach (UserSetting::where('owner', $userId)->get() as $item) {
             $parameters[] = array_filter($item->toArray(), function ($k) {
-                return ($k == 'name' || $k == 'value' || $k == 'is_switchable');
+                return (
+                    $k == 'name' ||
+                    $k == 'value' ||
+                    $k == 'is_switchable' ||
+                    $k == 'description_RUS' ||
+                    $k == 'description_ENG'
+                );
             }, ARRAY_FILTER_USE_KEY);
 
         }
