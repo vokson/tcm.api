@@ -131,6 +131,10 @@ Route::middleware(['cors'])->group(function () {
         //RATING
         Route::post('/checker/rating/get', 'StatisticController@getItemsForCheckerRatingChart');
 
+        // USER SETTINGS
+        Route::post('/settings/user/get', 'UserSettingsController@get');
+        Route::post('/settings/user/set', 'UserSettingsController@set');
+
 
     });
 

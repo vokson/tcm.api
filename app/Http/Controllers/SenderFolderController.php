@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\MailController;
+
 
 class SenderFolderController extends Controller
 {
@@ -48,7 +50,7 @@ class SenderFolderController extends Controller
         $files = SenderFile::where('folder', $folder_id)->get();
 
         foreach ($files as $file) {
-            if ( (Storage::delete($file->server_name) === false) || ($file->delete() === false)) {
+            if ((Storage::delete($file->server_name) === false) || ($file->delete() === false)) {
                 return Feedback::getFeedback(603);
             }
         }
@@ -56,7 +58,7 @@ class SenderFolderController extends Controller
         return (SenderFolder::destroy($folder_id)) ? Feedback::getFeedback(0) : Feedback::getFeedback(901);
     }
 
-    function switch(Request $request)
+    function switch (Request $request)
     {
         $id = intval(Input::get('id', 0));
         $folder = SenderFolder::find($id);
@@ -65,8 +67,10 @@ class SenderFolderController extends Controller
             return Feedback::getFeedback(901);
         }
 
-        $folder->is_ready = ($folder->is_ready == 1) ? 0: 1;
+        $folder->is_ready = ($folder->is_ready == 1) ? 0 : 1;
         $folder->save();
+
+        MailController::sendNotification('SEND_NOTIFICATION_FROM_SENDER', $folder);
 
         return Feedback::getFeedback(0);
     }
