@@ -55,11 +55,11 @@ class CheckController extends Controller
 
         if ($isOnlyLast == true) {
             $query
-                ->select(DB::raw('"id", "file_id", "filename", "extension", "status", "mistake_count", "owner", max("created_at") as "date"'))
+                ->select(DB::raw('"id", "file_id", "filename", "extension", "status", "mistake_count", "owner", max("updated_at") as "date"'))
                 ->groupBy('filename');
 
         } else {
-            $query->select(['id', 'file_id', "filename", "extension", 'status', 'mistake_count', 'owner', 'created_at as date']);
+            $query->select(['id', 'file_id', "filename", "extension", 'status', 'mistake_count', 'owner', 'updated_at as date']);
         }
 
 
