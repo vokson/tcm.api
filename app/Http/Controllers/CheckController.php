@@ -47,7 +47,7 @@ class CheckController extends Controller
         [$idUsers, $idNamesUsers] = $this->getNamesUsers($owner);
 
         $query = DB::table('checks')
-            ->whereBetween('created_at', [$dayStartDate, $dayEndDate])
+            ->whereBetween('updated_at', [$dayStartDate, $dayEndDate])
             ->where('filename', 'like', '%' . $filename . '%')
             ->where('extension', 'like', '%' . $extension . '%')
             ->where('mistake_count', 'like', '%' . $mistake_count . '%')
