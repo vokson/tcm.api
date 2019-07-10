@@ -53,6 +53,7 @@ class FeedbackController extends Controller
         608 => 'Zip archive can not be created',
         609 => 'Name of file is not correct',
         610 => 'PDF file can not be created',
+        611 => 'Task folder can not be created',
         //Check
         701 => 'Wrong input Id',
         //Chart

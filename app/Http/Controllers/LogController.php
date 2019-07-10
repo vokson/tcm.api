@@ -60,7 +60,6 @@ class LogController extends Controller
         $log->to = $request->input('to');
         $log->from = $request->input('from');
         $log->title = $request->input('title');
-//        $log->is_new = $request->input('is_new');
         $log->created_at = $request->input('date');
 
 
