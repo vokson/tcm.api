@@ -49,14 +49,14 @@ class ServiceController extends Controller
         return;
     }
 
-    public static function createFolderForFileByNumber($number)
+    public static function createFolderForFileByNumber($number, $pitch = 1000)
     {
-        $min = intdiv($number, 1000) * 1000 + 1;
-        $max = (intdiv($number, 1000) + 1) * 1000;
+        $min = intdiv($number, $pitch) * $pitch + 1;
+        $max = (intdiv($number, $pitch) + 1) * $pitch;
 
-        if ($number % 1000 == 0) {
-            $min = $min - 1000;
-            $max = $max - 1000;
+        if ($number % $pitch == 0) {
+            $min = $min - $pitch;
+            $max = $max - $pitch;
         }
 
 //        echo "MIN = " . $min . '<br/>';

@@ -107,13 +107,13 @@ class CheckController extends Controller
 
     public static function validateNameOfNewFile($fileNameWithExtension)
     {
-        $regExpForNewFile = "/^0055-TCM-NKK-\d{1}\.\d{1}\.\d{1}\.\d{2}\.\d{3}-(VK|NV|NVK|NK|PT|TM|THM|TI|VS|GSV|GSN|TS|TT|OE|AD|GP|GT|IZT|PJ|AR|AS|KJ|KM|VL|RZA|EPO|EPZ|ER|ERZ|EOE|EHZ|TH|AK|AKZ|ANK|ANV|AE|OV|OVO|OVK|ASK|ATH|SSL|OS|AUP|SS|RT|PS|SM|MG|AOV|AOVK|AES|AGSN|AMG|ANK|ANVK|APT|ATS|AVK|EG|EM| EN|EO|ES|ET){1}\d{0,3}-(OD|PL|KP|PR|CP|DT|ID|SC|RR|CJ|LT|LS|LR|OS|UO|PID|PFD|IS|SP|OL|IZ|NI|PU|TDA|TT|PO|PI){1}-\d{4}_(VD|SD|A1|B1|\d{2}){1}_(RU|EN|ER){1}(_(CRS|ACRS){1})?(_(Att|ATT)\d{1,2})?\.(dwg|DWG|pdf|PDF|doc|DOC|docx|DOCX|xls|XLS|xlsx|XLSX|zip|ZIP){1}$/";
+        $regExpForNewFile = SettingsController::take('CHECKER_REG_EXP_FOR_NEW_FILE');
         return (preg_match($regExpForNewFile, $fileNameWithExtension) === 1);
     }
 
     public static function validateNameOfCheckedFile($fileNameWithExtension)
     {
-        $regExpForCheckedFile = "/^0055-TCM-NKK-\d{1}\.\d{1}\.\d{1}\.\d{2}\.\d{3}-(VK|NV|NVK|NK|PT|TM|THM|TI|VS|GSV|GSN|TS|TT|OE|AD|GP|GT|IZT|PJ|AR|AS|KJ|KM|VL|RZA|EPO|EPZ|ER|ERZ|EOE|EHZ|TH|AK|AKZ|ANK|ANV|AE|OV|OVO|OVK|ASK|ATH|SSL|OS|AUP|SS|RT|PS|SM|MG|AOV|AOVK|AES|AGSN|AMG|ANK|ANVK|APT|ATS|AVK|EG|EM| EN|EO|ES|ET){1}\d{0,3}-(OD|PL|KP|PR|CP|DT|ID|SC|RR|CJ|LT|LS|LR|OS|UO|PID|PFD|IS|SP|OL|IZ|NI|PU|TDA|TT|PO|PI){1}-\d{4}_(VD|SD|A1|B1|\d{2}){1}_(RU|EN|ER){1}(_(CRS|ACRS){1})?(_(Att|ATT)\d{1,2})?\[\d+\]\.(dwg|DWG|pdf|PDF|doc|DOC|docx|DOCX|xls|XLS|xlsx|XLSX|zip|ZIP){1}$/";
+        $regExpForCheckedFile = SettingsController::take('CHECKER_REG_EXP_FOR_CHECKED_FILE');
         return (preg_match($regExpForCheckedFile, $fileNameWithExtension) === 1);
     }
 

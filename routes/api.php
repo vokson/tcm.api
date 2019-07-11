@@ -136,7 +136,7 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/settings/user/set', 'UserSettingsController@set');
 
         // TASKS
-        Route::post('/settings/task/create', 'TaskController@create');
+        Route::post('/task/create', 'TaskController@create');
 
 
     });

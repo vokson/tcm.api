@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Title;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Storage;
+use App\Log;
+use App\Http\Controllers\FeedbackController as Feedback;
 
 class TaskController extends Controller
 {
@@ -14,51 +18,53 @@ class TaskController extends Controller
             return Feedback::getFeedback(303);
         }
 
-        $task_id = $this->createFolder();
+        $task_id = SettingsController::take('LAST_TASK_NUMBER') + 1;
 
-        if ($task_id == -1) {
+        if (Storage::exists($this->getFolderPathById($task_id))) {
+            return Feedback::getFeedback(612);
+        }
+
+        if (!$this->createFolder($task_id)) {
             return Feedback::getFeedback(611);
         }
+
+        SettingsController::save('LAST_TASK_NUMBER', $task_id);
 
         $owner_id = UserController::getUserId($request);
 
         $log = new Log;
 
         $log->owner = $owner_id;
-        $log->is_new = true;
+        $log->is_new = false;
         $log->to = $owner_id;
         $log->from = $owner_id;
         $log->title = $request->input('title');
-        $log->what = SettingsController::take('CREATE_TASK_NOTIFICATION') + ' ' + $task_id;
+        $log->what = SettingsController::take('CREATE_TASK_NOTIFICATION') . ' ' .  $task_id;
 
         $log->save();
 
         return Feedback::getFeedback(0);
     }
 
-    private function createFolder()
+    private function getFolderPathById($id)
     {
-        $id = SettingsController::take('LAST_TASK_NUMBER') + 1;
+        return 'log_file_storage' . DIRECTORY_SEPARATOR . 'TASKS' . DIRECTORY_SEPARATOR .
+            ServiceController::createFolderForFileByNumber($id, 100) . DIRECTORY_SEPARATOR .
+            'TASK ' . sprintf("%04d", $id);
+    }
 
+    private function createFolder($id)
+    {
         try {
 
-            $result = Storage::makeDirectory(
-                'log_file_storage' . DIRECTORY_SEPARATOR . 'TASKS' . DIRECTORY_SEPARATOR .
-                ServiceController::createFolderForFileByNumber($id) . DIRECTORY_SEPARATOR .
-                'TASK ' . $id
-            );
+            $result = Storage::makeDirectory($this->getFolderPathById($id));
 
         } catch (QueryException $e) {
+
             return false;
         }
 
-        if ($result) {
-            SettingsController::save('LAST_TASK_NUMBER', $id);
-            return $id;
-
-        } else {
-            return -1;
-        }
+       return $result;
 
     }
 }
