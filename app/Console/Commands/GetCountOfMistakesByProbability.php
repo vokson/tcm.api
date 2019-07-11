@@ -13,7 +13,7 @@ class GetCountOfMistakesByProbability extends Command
      *
      * @var string
      */
-    protected $signature = 'agpz:probability';
+    protected $signature = 'checker:probability';
 
     /**
      * The console command description.

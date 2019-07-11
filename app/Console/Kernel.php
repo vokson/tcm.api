@@ -29,7 +29,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('database:backup')->hourly();
         $schedule->command('database:backup_clean')->daily();
-        $schedule->command('agpz:probability')->daily();
+        $schedule->command('checker:probability')->daily();
     }
 
     /**

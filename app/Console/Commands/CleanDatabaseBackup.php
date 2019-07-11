@@ -40,7 +40,7 @@ class CleanDatabaseBackup extends Command
      */
     public function handle()
     {
-        $directory = storage_path('app/database_backup/TCM.API/');
+        $directory = storage_path('app/database_backup/');
         $scanned_directory = array_diff(scandir($directory), array('..', '.'));
 
         foreach ($scanned_directory as $filename) {
