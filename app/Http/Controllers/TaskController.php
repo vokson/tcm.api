@@ -48,7 +48,7 @@ class TaskController extends Controller
 
     private function getFolderPathById($id)
     {
-        return 'log_file_storage' . DIRECTORY_SEPARATOR . 'TASKS' . DIRECTORY_SEPARATOR .
+        return 'tasks' . DIRECTORY_SEPARATOR .
             ServiceController::createFolderForFileByNumber($id, 100) . DIRECTORY_SEPARATOR .
             'TASK ' . sprintf("%04d", $id);
     }
