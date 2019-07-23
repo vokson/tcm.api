@@ -67,6 +67,10 @@ class ApiCheckRole
             "api/titles/delete",
         ];
 
+        $document_controller = [
+            "api/docs/edit/get"
+        ];
+
         $pm = [
 
         ];
@@ -88,8 +92,9 @@ class ApiCheckRole
         $this->permissions = [
             "engineer" => array_merge($engineer),
             "group_leader" => array_merge($engineer, $group_leader),
-            "pm" => array_merge($engineer, $group_leader, $pm),
-            "admin" => array_merge($engineer, $group_leader, $pm, $admin)
+            "document_controller" => array_merge($engineer, $group_leader, $document_controller),
+            "pm" => array_merge($engineer, $group_leader, $document_controller, $pm),
+            "admin" => array_merge($engineer, $group_leader, $document_controller, $pm, $admin)
         ];
     }
 

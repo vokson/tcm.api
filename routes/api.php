@@ -138,6 +138,9 @@ Route::middleware(['cors'])->group(function () {
         // TASKS
         Route::post('/task/create', 'TaskController@create');
 
+        // DOCS
+        Route::post('/docs/edit/get', 'DocsController@getListOfTransmittal');
+
 
     });
 
