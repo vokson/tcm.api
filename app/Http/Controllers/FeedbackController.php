@@ -63,7 +63,19 @@ class FeedbackController extends Controller
         803 => 'Volume of title is not integer type',
         804 => 'Incorrect predecessor of title',
         //Sender
-        901 => 'Wrong input Id'
+        901 => 'Wrong input Id',
+        //Docs
+        1001 => 'Docs are missed',
+        1002 => 'Code 1 is missed',
+        1003 => 'Code 2 is missed',
+        1004 => 'Revision is missed',
+        1005 => 'Class is missed',
+        1006 => 'Rus title is missed',
+        1007 => 'Eng title is missed',
+        1008 => 'ID is missed',
+        1009 => 'Code 1 is empty',
+        1010 => 'Revision is empty',
+        1011 => 'Wrong ID',
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

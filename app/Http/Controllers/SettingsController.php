@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Doc;
 use Illuminate\Http\Request;
 use App\Setting;
 use App\Http\Controllers\FeedbackController As Feedback;
@@ -59,7 +60,7 @@ class SettingsController extends Controller
     {
 
         if (!Input::has('items')) {
-            return Feedback::getFeedback(203);
+            return Feedback::getFeedback(204);
         }
 
         foreach ($request->input('items') as $item) {
@@ -84,4 +85,6 @@ class SettingsController extends Controller
         return Feedback::getFeedback(0);
 
     }
+
+
 }
