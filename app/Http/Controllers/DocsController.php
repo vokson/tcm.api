@@ -29,6 +29,42 @@ class DocsController extends Controller
 
     }
 
+    public function addNewDocumentToTransmittal(Request $request)
+    {
+//        return Feedback::getFeedback(0);
+
+
+        $transmittal_name = trim(Input::get('transmittal', ''));
+
+        $transmittal = Title::where('name', $transmittal_name)->first();
+
+        if (is_null($transmittal)) {
+            return Feedback::getFeedback(402);
+        }
+
+        try {
+
+            $doc = new Doc;
+
+            $doc->code_1 = '???';
+            $doc->revision = '???';
+            $doc->transmittal = $transmittal->id;
+
+            $doc->save();
+
+        } catch (Exception $e) {
+
+            return Feedback::getFeedback(1011, [
+            'exception' => $e
+
+        ]);
+
+        }
+
+        return Feedback::getFeedback(0);
+
+    }
+
     public function saveListOfTransmittal(Request $request)
     {
 
