@@ -70,7 +70,9 @@ class ApiCheckRole
         $document_controller = [
             "api/docs/edit/get",
             "api/docs/edit/set",
-            "api/docs/edit/add"
+            "api/docs/edit/add",
+            "api/docs/edit/delete",
+            "api/docs/edit/file/upload"
         ];
 
         $pm = [

@@ -142,6 +142,8 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/docs/edit/get', 'DocsController@getListOfTransmittal');
         Route::post('/docs/edit/set', 'DocsController@saveListOfTransmittal');
         Route::post('/docs/edit/add', 'DocsController@addNewDocumentToTransmittal');
+        Route::post('/docs/edit/delete', 'DocsController@deleteDocumentFromTransmittal');
+        Route::post('/docs/edit/file/upload', 'DocsController@upload');
 
 
     });

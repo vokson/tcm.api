@@ -76,6 +76,9 @@ class FeedbackController extends Controller
         1009 => 'Code 1 is empty',
         1010 => 'Revision is empty',
         1011 => 'Wrong ID',
+        1012 => 'Doc can not be added',
+        1013 => 'Doc can not be deleted',
+        1014 => 'Wrong file list format',
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])
