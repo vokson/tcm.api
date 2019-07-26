@@ -39,7 +39,11 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/logs/get/last/articles', 'LogController@getLatestArticles');
 
         Route::middleware(['auth.log.edit', 'reg_exp.log.edit'])->group(function () {
-            Route::post('/logs/set', 'LogController@set');
+
+            Route::middleware(['log.transmittal.record.create'])->group(function () {
+                Route::post('/logs/set', 'LogController@set');
+            });
+
             Route::post('/logs/delete', 'LogController@delete');
         });
 

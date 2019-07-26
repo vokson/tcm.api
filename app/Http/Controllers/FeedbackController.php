@@ -28,6 +28,7 @@ class FeedbackController extends Controller
         306 => 'Wrong input Date',
         307 => 'Wrong input Is New',
         308 => 'Can not delete article because of attached files',
+        309 => 'Second record for transmittal is restricted',
         //Title
         401 => 'Wrong input Id',
         402 => 'Wrong input Name',
@@ -79,6 +80,7 @@ class FeedbackController extends Controller
         1012 => 'Doc can not be added',
         1013 => 'Doc can not be deleted',
         1014 => 'Wrong file list format',
+        1015 => 'First record for transmittal is missed'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

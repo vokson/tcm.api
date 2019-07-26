@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Doc;
+use App\Log;
 use App\Title;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
@@ -183,17 +184,23 @@ class DocsController extends Controller
 
         // Читаем JSON файл
 
-        $list = json_decode(file_get_contents(storage_path("app/" . $path)));
+        $list = json_decode($this->removeUtf8ByteOrderMark(file_get_contents(storage_path("app/" . $path))), true);
 
-//        if (is_null($list)) {
-//            return Feedback::getFeedback(1014);
-//        }
+        Storage::delete($path);
 
-        return Feedback::getFeedback(0,[
-            'list' => $list,
-            'error' => json_last_error_msg(),
-            'json' => file_get_contents(storage_path("app/" . $path))
-        ]);
+        if (is_null($list)) {
+            return Feedback::getFeedback(1014);
+        }
+
+//        return Feedback::getFeedback(0, [
+//            'list' => $list,
+//            'error' => json_last_error_msg(),
+//            'json1' => $s1,
+//            'json2' => $s2,
+//            'strcmp' => strcmp($s1, $s2),
+//            'symbol_1' => substr($s1, 0,10),
+//            'symbol_2' => substr($s2, 0,10)
+//        ]);
 
         try {
 
@@ -201,16 +208,40 @@ class DocsController extends Controller
 
                 $doc = new Doc;
 
-                $doc->code_1 = $item->code_1;
-                $doc->code_2 = $item->code_2;
-                $doc->revision = $item->revision;
-                $doc->class = $item->class;
+                $doc->code_1 = $item['CODE_1'];
+                $doc->code_2 = $item['CODE_2'];
+                $doc->revision = $item['REVISION'];
+                $doc->class = $item['CLASS'];
                 $doc->transmittal = $transmittal->id;
-                $doc->title_en = $item->title_en;
-                $doc->title_ru = $item->title_ru;
+                $doc->title_en = $item['TITLE_EN'];
+                $doc->title_ru = $item['TITLE_RU'];
 
                 $doc->save();
             }
+
+            unset($list['DOCS']);
+
+            $log = Log::where('title', $transmittal->id)->first();
+
+            if (is_null($log)) {
+                return Feedback::getFeedback(1015);
+            }
+
+            $log->what = print_r($list, true);
+            $log->save();
+
+//            $s = '';
+//            $s .=
+//
+//            $log->what = '<p>' . $list['TRANSMITTAL'] . '</p>';
+//            $log->what = '<p>' . $list['PURPOSE'] . '</p>';
+//            $log->what = '<p>' . $list['DATE'] . '</p>';
+//            $log->what = '<p>' . $list['SUMMARY'] . '</p>';
+//            $log->what = '<p>' . $list['SUMMARY'] . '</p>';
+//            $log->what = '<p>' . $list['SUMMARY'] . '</p>';
+
+
+
 
         } catch (Exception $e) {
             return Feedback::getFeedback(1014);
@@ -226,5 +257,11 @@ class DocsController extends Controller
         return (preg_match($regExpForNewFile, $fileNameWithExtension) === 1);
     }
 
+    private function removeUtf8ByteOrderMark($text)
+    {
+        $bom = pack('H*', 'EFBBBF');
+        $text = preg_replace("/^$bom/", '', $text);
+        return $text;
+    }
 
 }
