@@ -59,7 +59,8 @@ class ApiCheckRole
             "api/merge/pdf/file/download",
             'api/settings/user/get',
             'api/settings/user/set',
-            'api/task/create'
+            'api/task/create',
+            'api/docs/search/get'
         ];
 
         $group_leader = [
