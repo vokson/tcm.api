@@ -19,6 +19,12 @@ class ApiCheckCountOfLogsForTransmittal
      */
     public function handle($request, Closure $next)
     {
+        $log_id = $request->input('id', null);
+
+        if (!is_null($log_id)) {
+            return $next($request);
+        }
+
         $title_id = $request->input('title');
         $title_name = Title::find($title_id)->name;
 

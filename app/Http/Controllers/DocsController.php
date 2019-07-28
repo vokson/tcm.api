@@ -11,6 +11,7 @@ use App\Http\Controllers\FeedbackController as Feedback;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\DB;
+use DateTime;
 
 class DocsController extends Controller
 {
@@ -42,60 +43,46 @@ class DocsController extends Controller
 
     public function search(Request $request)
     {
+        $parameters = [
+            'code_1' => '',
+            'code_2' => '',
+            'class' => '',
+            'revision' => '',
+            'title_en' => '',
+            'title_ru' => ''
+        ];
+
+        foreach ($parameters as $key => $value) {
+            $parameters[$key] = $request->input($key, '');
+        }
+
         $transmittalName = $request->input('transmittal', '');
-        $code_1 = $request->input('code_1', '');
-        $code_2 = $request->input('code_2', '');
-        $class = $request->input('class', '');
-        $revision = $request->input('revision', '');
-        $title_en = $request->input('title_en', '');
-        $title_ru = $request->input('title_ru', '');
-        $date1 = $request->input('date1', '');
-        $date2 = $request->input('date2', '');
+        $date1 = intval(trim(Input::get('date1', '')));
+        $date2 = intval(trim(Input::get('date2', '')));
         $isOnlyLast = $request->input('is_only_last', false);
 
-        // Ищем список трансмитталов, подходящих под запрос
+        //DATE
+        $dayStartDate = 1;
+        $dayEndDate = 9999999999;
 
-//        $titlesWithTransmittal = Title::where('name', 'regexp', '"' . trim(SettingsController::take('TRANSMITTAL_REG_EXP'), '/') . '"')->get();
-
-        $query = DB::table('titles');
-
-        if ($transmittalName != '') {
-            $query->where('name', 'like', '%' . $transmittalName . '%');
+        if ($date1 != '' && $date2 != '') {
+            $dayStartDate = intval (DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U'));
+            $dayEndDate = intval( DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U'));
         }
 
-        $titlesWithTransmittal = $query->get()->toArray();
 
+        $firstLogs = DB::table('logs')
+            ->select(DB::raw('MIN(created_at) as date, title'))
+            ->groupBy('title');
 
-//        return Feedback::getFeedback(0, [
-//            'trans' => $titlesWithTransmittal
-//        ]);
+        $query = DB::table('docs')
+            ->joinSub($firstLogs, 'firstLogs', function ($join) {
+                $join->on('docs.transmittal', '=', 'firstLogs.title');
+            })
+            ->join('titles', function ($join) {
+                $join->on('docs.transmittal', '=', 'titles.id');
+            })
 
-        $listOfTransmittalIds = [];
-        $transmittalIssuanceDate = [];
-        $transmittalName = [];
-
-        // Составляем список ID трансмитталов и список дат их выпуска, имен
-        // регулярное выражение имени транмиттала
-
-        foreach ($titlesWithTransmittal as $item) {
-
-            if (preg_match(SettingsController::take('TRANSMITTAL_REG_EXP'), $item->name)) {
-
-                $listOfTransmittalIds[] = $item->id;
-
-                $firstLogForTransmittal = Log::where('title', $item->id)->first();
-
-                if (!is_null($firstLogForTransmittal)) {
-                    $transmittalIssuanceDate[$item->id] = $firstLogForTransmittal->created_at;
-                    $transmittalName[$item->id] = $item->name;
-                }
-            }
-
-        }
-
-        // Ищем записи
-
-        $docs = DB::table('docs')
             ->select(
                 'docs.id',
                 'docs.code_1',
@@ -104,31 +91,32 @@ class DocsController extends Controller
                 'docs.class',
                 'docs.transmittal as transmittal_id',
                 'docs.title_en',
-                'docs.title_ru'
-            )
-            ->whereIn('transmittal_id', $listOfTransmittalIds)
-            ->where('code_1', 'like', '%' . $code_1 . '%')
-            ->where('code_2', 'like', '%' . $code_2 . '%')
-            ->where('class', 'like', '%' . $class . '%')
-            ->where('revision', 'like', '%' . $revision . '%')
-            ->where('title_en', 'like', '%' . $title_en . '%')
-            ->where('title_ru', 'like', '%' . $title_ru . '%')
-            ->get();
+                'docs.title_ru',
+                'titles.name as transmittal',
+                'firstLogs.date as date'
+            );
 
-//        return Feedback::getFeedback(0, [
-//            'items' => $docs,
-//            'name' => $transmittalName,
-//            'date' => $transmittalIssuanceDate
-//        ]);
-
-        // Добавляем имена и даты от трансмитталов
-        foreach ($docs->toArray() as $item) {
-            $item->transmittal = $transmittalName[$item->transmittal_id];
-            $item->date = $transmittalIssuanceDate[$item->transmittal_id];
+        foreach ($parameters as $key => $value) {
+            if ($value != '') {
+                $query->where($key, 'like', '%' . $value . '%');
+            }
         }
 
+        if ($transmittalName != '') {
+            $query->where('titles.name', 'like', '%' . $transmittalName . '%');
+        }
+
+        $query->whereBetween('firstLogs.date', [$dayStartDate, $dayEndDate]);
+
+//        DB::enableQueryLog();
+
+        $docs = $query->get();
+
         return Feedback::getFeedback(0, [
-            'items' => $docs
+            'items' => $docs->toArray(),
+//            'query' => DB::getQueryLog(),
+//            'start' => $dayStartDate,
+//            'end' => $dayEndDate
         ]);
 
     }
