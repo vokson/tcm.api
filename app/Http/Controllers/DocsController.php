@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Doc;
 use App\Log;
 use App\Title;
+use App\UploadedFile;
+use Hamcrest\Core\Set;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
 use Illuminate\Support\Facades\Storage;
@@ -66,13 +69,13 @@ class DocsController extends Controller
         $dayEndDate = 9999999999;
 
         if ($date1 != '' && $date2 != '') {
-            $dayStartDate = intval (DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U'));
-            $dayEndDate = intval( DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U'));
+            $dayStartDate = intval(DateTime::createFromFormat('U', min($date1, $date2))->setTime(0, 0, 0)->format('U'));
+            $dayEndDate = intval(DateTime::createFromFormat('U', max($date1, $date2))->setTime(23, 59, 59)->format('U'));
         }
 
 
         $firstLogs = DB::table('logs')
-            ->select(DB::raw('MIN(created_at) as date, title'))
+            ->select(DB::raw('MIN(created_at) as date, title, id'))
             ->groupBy('title');
 
         $query = DB::table('docs')
@@ -82,7 +85,6 @@ class DocsController extends Controller
             ->join('titles', function ($join) {
                 $join->on('docs.transmittal', '=', 'titles.id');
             })
-
             ->select(
                 'docs.id',
                 'docs.code_1',
@@ -93,7 +95,8 @@ class DocsController extends Controller
                 'docs.title_en',
                 'docs.title_ru',
                 'titles.name as transmittal',
-                'firstLogs.date as date'
+                'firstLogs.date as date',
+                'firstLogs.id as log_id'
             );
 
         foreach ($parameters as $key => $value) {
@@ -111,6 +114,23 @@ class DocsController extends Controller
 //        DB::enableQueryLog();
 
         $docs = $query->get();
+
+        // Ищем файлы
+
+        foreach ($docs as $doc) {
+            $files = UploadedFile::where('log', $doc->log_id)
+                ->where('original_name', 'like', '%'. $doc->code_1 .'%')
+                ->get();
+
+            $doc->file_id = null;
+
+            foreach ($files as $file) {
+                if (preg_match(SettingsController::take('DOCS_REG_EXP_FOR_PDF_FILE'), $file->original_name)) {
+                    $doc->file_id = $file->id;
+                    break;
+                }
+            }
+        }
 
         return Feedback::getFeedback(0, [
             'items' => $docs->toArray(),
