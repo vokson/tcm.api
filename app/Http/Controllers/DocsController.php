@@ -79,26 +79,39 @@ class DocsController extends Controller
             ->select(DB::raw('MIN(created_at) as date, title, id'))
             ->groupBy('title');
 
-        $query = DB::table('docs')
-            ->joinSub($firstLogs, 'firstLogs', function ($join) {
-                $join->on('docs.transmittal', '=', 'firstLogs.title');
-            })
-            ->join('titles', function ($join) {
-                $join->on('docs.transmittal', '=', 'titles.id');
-            })
-            ->select(
-                'docs.id',
-                'docs.code_1',
-                'docs.code_2',
-                'docs.revision',
-                'docs.class',
-                'docs.transmittal as transmittal_id',
-                'docs.title_en',
-                'docs.title_ru',
-                'titles.name as transmittal',
-                'firstLogs.date as date',
-                'firstLogs.id as log_id'
-            );
+        $maxRevs = DB::table('docs')
+            ->select(DB::raw('MAX(revision),  id'))
+            ->groupBy('code_1');
+
+        $query = DB::table('docs');
+
+        if ($isOnlyLast) {
+            $query->joinSub($maxRevs, 'maxRevs', function ($join) {
+                $join->on('docs.id', '=', 'maxRevs.id');
+            });
+        }
+
+        $query->joinSub($firstLogs, 'firstLogs', function ($join) {
+            $join->on('docs.transmittal', '=', 'firstLogs.title');
+        });
+
+        $query->join('titles', function ($join) {
+            $join->on('docs.transmittal', '=', 'titles.id');
+        });
+
+        $query->select(
+            'docs.id',
+            'docs.code_1',
+            'docs.code_2',
+            'docs.revision',
+            'docs.class',
+            'docs.transmittal as transmittal_id',
+            'docs.title_en',
+            'docs.title_ru',
+            'titles.name as transmittal',
+            'firstLogs.date as date',
+            'firstLogs.id as log_id'
+        );
 
         foreach ($parameters as $key => $value) {
             if ($value != '') {
@@ -120,7 +133,7 @@ class DocsController extends Controller
 
         foreach ($docs as $doc) {
             $files = UploadedFile::where('log', $doc->log_id)
-                ->where('original_name', 'like', '%'. $doc->code_1 .'%')
+                ->where('original_name', 'like', '%' . $doc->code_1 . '%')
                 ->get();
 
             $doc->file_id = null;
