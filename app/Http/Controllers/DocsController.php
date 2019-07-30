@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\DB;
 use DateTime;
+use Exception;
 
 class DocsController extends Controller
 {
@@ -320,16 +321,6 @@ class DocsController extends Controller
             return Feedback::getFeedback(1014);
         }
 
-//        return Feedback::getFeedback(0, [
-//            'list' => $list,
-//            'error' => json_last_error_msg(),
-//            'json1' => $s1,
-//            'json2' => $s2,
-//            'strcmp' => strcmp($s1, $s2),
-//            'symbol_1' => substr($s1, 0,10),
-//            'symbol_2' => substr($s2, 0,10)
-//        ]);
-
         try {
 
             foreach ($list['DOCS'] as $item) {
@@ -357,17 +348,6 @@ class DocsController extends Controller
 
             $log->what = print_r($list, true);
             $log->save();
-
-//            $s = '';
-//            $s .=
-//
-//            $log->what = '<p>' . $list['TRANSMITTAL'] . '</p>';
-//            $log->what = '<p>' . $list['PURPOSE'] . '</p>';
-//            $log->what = '<p>' . $list['DATE'] . '</p>';
-//            $log->what = '<p>' . $list['SUMMARY'] . '</p>';
-//            $log->what = '<p>' . $list['SUMMARY'] . '</p>';
-//            $log->what = '<p>' . $list['SUMMARY'] . '</p>';
-
 
         } catch (Exception $e) {
             return Feedback::getFeedback(1014);
