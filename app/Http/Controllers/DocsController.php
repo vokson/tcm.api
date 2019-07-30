@@ -127,6 +127,8 @@ class DocsController extends Controller
 
 //        DB::enableQueryLog();
 
+        $query->orderBy('code_1', 'revision');
+
         $docs = $query->get();
 
         // Ищем файлы
