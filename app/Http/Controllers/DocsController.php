@@ -16,34 +16,10 @@ use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\DB;
 use DateTime;
 use Exception;
+use Carbon\Carbon;
 
 class DocsController extends Controller
 {
-
-//$queryCreator = new DocumentWhereQueryCreator();
-//
-//if ($request->input('only_last_rev') == 1) {
-//$docs = DB::table('docs')
-//->join('transmittals', function ($join) {
-//    $join->on('docs.trans_id', '=', 'transmittals.id');
-//})
-//->join('max_revs', function ($join) {
-//    // nipi_code, rev are used to avoid SQL error
-//    $join->on('docs.nipigaz_code', '=', 'max_revs.nipi_code');
-//    $join->on('docs.revision', '=', 'max_revs.rev');
-//})
-//->select('docs.*', 'transmittals.name as transmittal', 'transmittals.issued_at')
-//->where($queryCreator->make($request))
-//->get();
-//} else {
-//    $docs = DB::table('docs')
-//        ->join('transmittals', function ($join) {
-//            $join->on('docs.trans_id', '=', 'transmittals.id');
-//        })
-//        ->select('docs.*', 'transmittals.name as transmittal', 'transmittals.issued_at')
-//        ->where($queryCreator->make($request))
-//        ->get();
-//}
 
     public function search(Request $request)
     {
@@ -150,9 +126,6 @@ class DocsController extends Controller
 
         return Feedback::getFeedback(0, [
             'items' => $docs->toArray(),
-//            'query' => DB::getQueryLog(),
-//            'start' => $dayStartDate,
-//            'end' => $dayEndDate
         ]);
 
     }
@@ -289,13 +262,6 @@ class DocsController extends Controller
     public function upload(Request $request)
     {
 
-        $transmittal_name = trim(Input::get('transmittal', ''));
-        $transmittal = Title::where('name', $transmittal_name)->first();
-
-        if (is_null($transmittal)) {
-            return Feedback::getFeedback(402);
-        }
-
         if (!$request->hasFile('log_file')) {
             return Feedback::getFeedback(601);
         };
@@ -338,6 +304,23 @@ class DocsController extends Controller
 
         try {
 
+            $transmittal_name = $list['TRANSMITTAL'];
+            $transmittal = Title::where('name', $transmittal_name)->first();
+
+            if (is_null($transmittal)) {
+                return Feedback::getFeedback(402);
+            }
+
+            $log = Log::where('title', $transmittal->id)->first();
+
+            if (is_null($log)) {
+                return Feedback::getFeedback(1015);
+            }
+
+            $log->what = print_r($list, true);
+            $log->created_at = Carbon::createFromFormat('d.m.Y', $list['DATE'])->timestamp;
+            $log->save();
+
             foreach ($list['DOCS'] as $item) {
 
                 $doc = new Doc;
@@ -355,14 +338,7 @@ class DocsController extends Controller
 
             unset($list['DOCS']);
 
-            $log = Log::where('title', $transmittal->id)->first();
 
-            if (is_null($log)) {
-                return Feedback::getFeedback(1015);
-            }
-
-            $log->what = print_r($list, true);
-            $log->save();
 
         } catch (Exception $e) {
             return Feedback::getFeedback(1014);
