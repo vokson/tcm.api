@@ -7,6 +7,7 @@ use App\Log;
 use App\Title;
 use Closure;
 use App\Http\Controllers\FeedbackController as Feedback;
+use App\ApiUser;
 
 class ApiCheckCountOfLogsForTransmittal
 {
@@ -29,12 +30,20 @@ class ApiCheckCountOfLogsForTransmittal
         $title_name = Title::find($title_id)->name;
 
         // Проверяем создана ли первая запись для трансмиттала
-        // если ДА, то запрещаем создавать вторую запись
+        // если НЕТ, то запрещаем создавать первую запись пользователям
+        // с правами ниже, чем document_controller
 
         $reg_exp = SettingsController::take('TRANSMITTAL_REG_EXP');
 
-        if (preg_match($reg_exp, $title_name) && !is_null(Log::where('title', $title_id)->first())) {
-            return Feedback::getFeedback(309);
+        if (preg_match($reg_exp, $title_name) && is_null(Log::where('title', $title_id)->first())) {
+
+            $token = $request->input('access_token');
+            $user = ApiUser::where('access_token', $token)->first();
+            $role = $user->role;
+
+            if ($role == 'engineer' || $role =='group_leader') {
+                return Feedback::getFeedback(309);
+            }
         }
 
         return $next($request);
