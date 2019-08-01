@@ -336,7 +336,6 @@ class DocsController extends Controller
         $text .= '<p>Назначение : ' . $list['PURPOSE'] . '</p>';
         $text .= '<p>Нужен ли ответ : ' . $list['IS_REPLY_REQUESTED'] . '</p>';
         $text .= '<p>К дате ' . $list['REPLY_BY'] . '</p>';
-        $text .= '<p>Нужен ли ответ : ' . $list['IS_REPLY_REQUESTED'] . '</p>';
         $text .= '<p>Кол-во документов: ' . $list['COUNT'] . '</p>';
         $text .= '<p>Дата : ' . $list['DATE'];
 
