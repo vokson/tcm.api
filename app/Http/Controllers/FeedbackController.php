@@ -28,6 +28,7 @@ class FeedbackController extends Controller
         306 => 'Wrong input Date',
         307 => 'Wrong input Is New',
         308 => 'Can not delete article because of attached files',
+        309 => 'Permission denied for creation of 1st record for transmittal',
         //Title
         401 => 'Wrong input Id',
         402 => 'Wrong input Name',
@@ -63,7 +64,23 @@ class FeedbackController extends Controller
         803 => 'Volume of title is not integer type',
         804 => 'Incorrect predecessor of title',
         //Sender
-        901 => 'Wrong input Id'
+        901 => 'Wrong input Id',
+        //Docs
+        1001 => 'Docs are missed',
+        1002 => 'Code 1 is missed',
+        1003 => 'Code 2 is missed',
+        1004 => 'Revision is missed',
+        1005 => 'Class is missed',
+        1006 => 'Rus title is missed',
+        1007 => 'Eng title is missed',
+        1008 => 'ID is missed',
+        1009 => 'Code 1 is empty',
+        1010 => 'Revision is empty',
+        1011 => 'Wrong ID',
+        1012 => 'Doc can not be added',
+        1013 => 'Doc can not be deleted',
+        1014 => 'Wrong file list format',
+        1015 => 'First record for transmittal is missed'
     ];
 
     public static function getFeedback($errorCode = 0, $arr = [])

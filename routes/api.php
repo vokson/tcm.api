@@ -39,7 +39,11 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/logs/get/last/articles', 'LogController@getLatestArticles');
 
         Route::middleware(['auth.log.edit', 'reg_exp.log.edit'])->group(function () {
-            Route::post('/logs/set', 'LogController@set');
+
+            Route::middleware(['log.transmittal.record.create'])->group(function () {
+                Route::post('/logs/set', 'LogController@set');
+            });
+
             Route::post('/logs/delete', 'LogController@delete');
         });
 
@@ -137,6 +141,15 @@ Route::middleware(['cors'])->group(function () {
 
         // TASKS
         Route::post('/task/create', 'TaskController@create');
+
+        // DOCS
+        Route::post('/docs/edit/get', 'DocsController@getListOfTransmittal');
+        Route::post('/docs/edit/set', 'DocsController@saveListOfTransmittal');
+        Route::post('/docs/edit/add', 'DocsController@addNewDocumentToTransmittal');
+        Route::post('/docs/edit/delete', 'DocsController@deleteDocumentFromTransmittal');
+        Route::post('/docs/edit/file/upload', 'DocsController@upload');
+        Route::post('/docs/search/get', 'DocsController@search');
+
 
 
     });
