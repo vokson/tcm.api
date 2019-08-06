@@ -182,6 +182,8 @@ class LogFileController extends Controller
         return response()->download(storage_path("app/" . $file->server_name), "", $headers);
     }
 
+
+
     public function downloadAll(Request $request)
     {
         $log_id = intval(Input::get('id', 0));
