@@ -112,16 +112,21 @@ class DocsController extends Controller
 
         foreach ($docs as $doc) {
             $files = UploadedFile::where('log', $doc->log_id)
-                ->where('original_name', 'like', '%' . $doc->code_1 . '%')
+                ->where('original_name', 'like', '%' . $doc->code_1 . '-IS' . $doc->revision . '%')
+                ->orderBy('original_name')
                 ->get();
 
-            $doc->file_id = null;
+            $doc->files = [];
+            $doc->primaryPdfFileId = null;
 
             foreach ($files as $file) {
-                if (preg_match(SettingsController::take('DOCS_REG_EXP_FOR_PDF_FILE'), $file->original_name)) {
-                    $doc->file_id = $file->id;
-                    break;
+                if (
+                    is_null($doc->primaryPdfFileId) &&
+                    preg_match(SettingsController::take('DOCS_REG_EXP_FOR_PDF_FILE'), $file->original_name)
+                    ) {
+                    $doc->primaryPdfFileId = $file->id;
                 }
+                $doc->files[] = ['name' => $file->original_name, 'id' => $file->id];
             }
         }
 
@@ -305,63 +310,63 @@ class DocsController extends Controller
 
         try {
 
-        $transmittal_name = $list['TRANSMITTAL'];
-        $transmittal = Title::where('name', $transmittal_name)->first();
+            $transmittal_name = $list['TRANSMITTAL'];
+            $transmittal = Title::where('name', $transmittal_name)->first();
 
-        if (is_null($transmittal)) {
-            $transmittal = new Title;
-            $transmittal->name = $list['TRANSMITTAL'];
-            $transmittal->status = SettingsController::take('STATUS_ID_FOR_NEW_TRANSMITTAL');
-        }
+            if (is_null($transmittal)) {
+                $transmittal = new Title;
+                $transmittal->name = $list['TRANSMITTAL'];
+                $transmittal->status = SettingsController::take('STATUS_ID_FOR_NEW_TRANSMITTAL');
+            }
 
-        $transmittal->description = $list['SUMMARY'];
-        $transmittal->volume = $list['COUNT'];
-        $transmittal->predecessor = $list['PURPOSE'];
+            $transmittal->description = $list['SUMMARY'];
+            $transmittal->volume = $list['COUNT'];
+            $transmittal->predecessor = $list['PURPOSE'];
 
-        $transmittal->save();
+            $transmittal->save();
 
-        $log = Log::where('title', $transmittal->id)->first();
+            $log = Log::where('title', $transmittal->id)->first();
 
-        if (is_null($log)) {
-            $log = new Log();
-            $log->title = $transmittal->id;
-            $log->from = UserController::getUserId($request);
-            $log->to = UserController::getUserId($request);
-            $log->owner = UserController::getUserId($request);
-        }
+            if (is_null($log)) {
+                $log = new Log();
+                $log->title = $transmittal->id;
+                $log->from = UserController::getUserId($request);
+                $log->to = UserController::getUserId($request);
+                $log->owner = UserController::getUserId($request);
+            }
 
 
-        $text = '<p>Трансмиттал : ' . $list['TRANSMITTAL'] . '</p>';
-        $text .= '<p>Описание : ' . $list['SUMMARY'] . '</p>';
-        $text .= '<p>Назначение : ' . $list['PURPOSE'] . '</p>';
-        $text .= '<p>Нужен ли ответ : ' . $list['IS_REPLY_REQUESTED'] . '</p>';
-        $text .= '<p>К дате ' . $list['REPLY_BY'] . '</p>';
-        $text .= '<p>Кол-во документов: ' . $list['COUNT'] . '</p>';
-        $text .= '<p>Дата : ' . $list['DATE'];
+            $text = '<p>Трансмиттал : ' . $list['TRANSMITTAL'] . '</p>';
+            $text .= '<p>Описание : ' . $list['SUMMARY'] . '</p>';
+            $text .= '<p>Назначение : ' . $list['PURPOSE'] . '</p>';
+            $text .= '<p>Нужен ли ответ : ' . $list['IS_REPLY_REQUESTED'] . '</p>';
+            $text .= '<p>К дате ' . $list['REPLY_BY'] . '</p>';
+            $text .= '<p>Кол-во документов: ' . $list['COUNT'] . '</p>';
+            $text .= '<p>Дата : ' . $list['DATE'];
 
-        $log->what = $text;
-        $log->created_at = Carbon::createFromFormat('d.m.Y', $list['DATE'])->timestamp;
-        $log->save();
+            $log->what = $text;
+            $log->created_at = Carbon::createFromFormat('d.m.Y', $list['DATE'])->timestamp;
+            $log->save();
 
-        // Очищаем содержимое трансмиттала перед загрузкой
-        Doc::where('transmittal', $transmittal->id)->delete();
+            // Очищаем содержимое трансмиттала перед загрузкой
+            Doc::where('transmittal', $transmittal->id)->delete();
 
-        foreach ($list['DOCS'] as $item) {
+            foreach ($list['DOCS'] as $item) {
 
-            $doc = new Doc;
+                $doc = new Doc;
 
-            $doc->code_1 = $item['CODE_1'];
-            $doc->code_2 = $item['CODE_2'];
-            $doc->revision = $item['REVISION'];
-            $doc->class = $item['CLASS'];
-            $doc->transmittal = $transmittal->id;
-            $doc->title_en = $item['TITLE_EN'];
-            $doc->title_ru = $item['TITLE_RU'];
+                $doc->code_1 = $item['CODE_1'];
+                $doc->code_2 = $item['CODE_2'];
+                $doc->revision = $item['REVISION'];
+                $doc->class = $item['CLASS'];
+                $doc->transmittal = $transmittal->id;
+                $doc->title_en = $item['TITLE_EN'];
+                $doc->title_ru = $item['TITLE_RU'];
 
-            $doc->save();
-        }
+                $doc->save();
+            }
 
-        unset($list['DOCS']);
+            unset($list['DOCS']);
 
 
         } catch (Exception $e) {
