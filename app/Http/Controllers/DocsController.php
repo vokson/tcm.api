@@ -111,8 +111,17 @@ class DocsController extends Controller
         // Ищем файлы
 
         foreach ($docs as $doc) {
+
+            // обрезаем TCM номер
+            $cleanedCode_1 = $doc->code_1;
+            $pos = strpos($cleanedCode_1, '_');
+
+            if ($pos) {
+                $cleanedCode_1 = substr($cleanedCode_1, 0, $pos);
+            }
+
             $files = UploadedFile::where('log', $doc->log_id)
-                ->where('original_name', 'like', '%' . $doc->code_1 . '-IS' . $doc->revision . '%')
+                ->where('original_name', 'like', '%' . $cleanedCode_1 . '%')
                 ->orderBy('original_name')
                 ->get();
 
@@ -123,7 +132,7 @@ class DocsController extends Controller
                 if (
                     is_null($doc->primaryPdfFileId) &&
                     preg_match(SettingsController::take('DOCS_REG_EXP_FOR_PDF_FILE'), $file->original_name)
-                    ) {
+                ) {
                     $doc->primaryPdfFileId = $file->id;
                 }
                 $doc->files[] = ['name' => $file->original_name, 'id' => $file->id];
