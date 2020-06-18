@@ -26,7 +26,7 @@ class ApiCheckSenderFolderDeletePermission
         $role = $user->role;
 
         // Ограничиваем удаление файлов Sender для всех, кроме ГИП, администратор
-        if ($role == 'pm' || $role == 'admin') {
+        if ($role == 'pm' || $role == 'admin' || $role == "document_controller") {
             return $next($request);
         } else {
             return Feedback::getFeedback(104);
