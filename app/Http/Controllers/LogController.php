@@ -151,7 +151,7 @@ class LogController extends Controller
         }
 
         $items = $query
-            ->orderBy('date', 'asc')
+            ->orderBy('date', 'desc')
             ->get();
 
 
