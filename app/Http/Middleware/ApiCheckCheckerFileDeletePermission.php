@@ -36,7 +36,14 @@ class ApiCheckCheckerFileDeletePermission
         $check = Check::find($request->input('id'));
         $lastRecord = Check::where('filename', $check->filename)->latest()->first();
 
-        if (($check->id != $lastRecord->id) || ($user->id != $check->owner)) {
+        // Если запись не последняя
+        if ($check->id != $lastRecord->id) {
+            return Feedback::getFeedback(104);
+        }
+
+        // Если user не является собсственником документа
+        // Только admin может удалять не свои документы
+        if (($user->role != 'admin') && ($user->id != $check->owner)) {
             return Feedback::getFeedback(104);
         }
 
