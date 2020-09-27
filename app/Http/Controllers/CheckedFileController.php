@@ -115,11 +115,30 @@ class CheckedFileController extends Controller
         }
 
         $file = CheckedFile::find($file_id);
+        $filename = $file->original_name;
+
+        try {
+            $check = Check::where('file_id', $file->id)->first();
+            if ($check->status == -1) {
+                $owner = ApiUser::find($check->owner);
+                $email = $owner->email;
+                $email = explode('@', $email);
+                $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                $name = pathinfo($filename, PATHINFO_FILENAME);
+                $filename = $name . '_' . $email[0];
+                if ($ext != '') {
+                    $filename .= '.' . $ext;
+                }
+            }
+
+        } catch (\Exception $e) {
+            $filename = $file->original_name;
+        }
 
         $headers = array(
             'Content-Type' => 'application/octet-stream',
             'Access-Control-Expose-Headers' => 'Content-Filename',
-            'Content-Filename' => rawurlencode($file->original_name)
+            'Content-Filename' => rawurlencode($filename)
         );
 
         return response()->download(storage_path("app/" . $file->server_name), "", $headers);
