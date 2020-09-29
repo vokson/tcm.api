@@ -219,4 +219,15 @@ class CheckController extends Controller
 
         return Feedback::getFeedback(0);
     }
+
+    public static function count()
+    {
+        $collection = DB::table('checks')
+            ->select('filename', 'status', DB::raw('MAX(updated_at)'))
+            ->groupBy('filename')
+            ->having('status', 0)
+            ->get();
+
+        return $collection->count();
+    }
 }

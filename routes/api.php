@@ -150,7 +150,8 @@ Route::middleware(['cors'])->group(function () {
         Route::post('/docs/edit/file/upload', 'DocsController@upload');
         Route::post('/docs/search/get', 'DocsController@search');
 
-
+        // COUNT
+        Route::post('/counts', 'CountController@get');
 
     });
 

@@ -27,7 +27,7 @@ class LogNewMessageController extends Controller
         return Feedback::getFeedback(0);
     }
 
-    public function count(Request $request)
+    public static function count(Request $request)
     {
         $token = $request->input('access_token');
         $user = ApiUser::where('access_token', $token)->first();
@@ -37,9 +37,6 @@ class LogNewMessageController extends Controller
             ->where('to', '=', $user->id)
             ->get();
 
-        return Feedback::getFeedback(0, [
-            'count' => $items->count()
-        ]);
-
+        return  $items->count();
     }
 }

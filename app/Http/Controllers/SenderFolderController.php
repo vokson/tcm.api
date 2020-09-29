@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\MailController;
 
 
 class SenderFolderController extends Controller
@@ -75,10 +74,8 @@ class SenderFolderController extends Controller
         return Feedback::getFeedback(0);
     }
 
-    function count()
+    public static function count()
     {
-        return Feedback::getFeedback(0, [
-            'count' => SenderFolder::all()->count()
-        ]);
+        return SenderFolder::all()->count();
     }
 }

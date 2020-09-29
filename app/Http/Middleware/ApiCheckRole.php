@@ -60,7 +60,8 @@ class ApiCheckRole
             'api/settings/user/get',
             'api/settings/user/set',
             'api/task/create',
-            'api/docs/search/get'
+            'api/docs/search/get',
+            'api/counts',
         ];
 
         $group_leader = [
