@@ -31,7 +31,6 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
-            // \Illuminate\Session\Middleware\AuthenticateSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -40,6 +39,8 @@ class Kernel extends HttpKernel
         'api' => [
 //            'throttle:60,1',
 //            'bindings',
+            'cors',
+            'route.permission'
         ],
     ];
 
@@ -72,5 +73,7 @@ class Kernel extends HttpKernel
         'auth.sender.folder.delete' => \App\Http\Middleware\ApiCheckSenderFolderDeletePermission::class,
         'auth.sender.folder.switch' => \App\Http\Middleware\ApiCheckSenderFolderSwitchPermission::class,
         'log.transmittal.record.create' => \App\Http\Middleware\ApiCheckCountOfLogsForTransmittal::class,
+
+        'route.permission' => \App\Http\Middleware\CheckPermissionForRoute::class,
     ];
 }

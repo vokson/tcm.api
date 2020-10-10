@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 //});
 
 
-Route::middleware(['cors'])->group(function () {
+//Route::middleware(['cors'])->group(function () {
 
     Route::post('/auth/login', 'ApiAuthController@login');
     Route::post('/auth/login/token', 'ApiAuthController@loginByToken');
@@ -153,11 +153,16 @@ Route::middleware(['cors'])->group(function () {
         // COUNT
         Route::post('/counts', 'CountController@get');
 
+
+        // ACTION
+        Route::post('/action/set', 'ActionController@set');
+        Route::post('/action/get', 'ActionController@get');
+
     });
 
 //    Route::get('/test', 'CheckController@test');
 
-});
+//});
 
 
 
