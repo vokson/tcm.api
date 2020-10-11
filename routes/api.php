@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 
-//Route::middleware(['cors'])->group(function () {
+Route::middleware(['cors'])->group(function () {
 
     Route::post('/auth/login', 'ApiAuthController@login');
     Route::post('/auth/login/token', 'ApiAuthController@loginByToken');
@@ -146,7 +146,7 @@ use Illuminate\Http\Request;
 
 //    Route::get('/test', 'CheckController@test');
 
-//});
+});
 
 
 

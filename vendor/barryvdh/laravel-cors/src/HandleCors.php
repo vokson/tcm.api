@@ -6,6 +6,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as LaravelResponse;
+use Illuminate\Support\Facades\Log as MyLog;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,16 +34,20 @@ class HandleCors
      */
     public function handle($request, Closure $next)
     {
+        MyLog::debug('CORS - START');
         if (! $this->cors->isCorsRequest($request)) {
+            MyLog::debug('CORS - NEXT 1');
             return $next($request);
         }
 
 
         if ($this->cors->isPreflightRequest($request)) {
+            MyLog::debug('CORS - NEXT 2');
             return $this->cors->handlePreflightRequest($request);
         }
 
         if (! $this->cors->isActualRequestAllowed($request)) {
+            MyLog::debug('CORS - NEXT 3');
             return new LaravelResponse('Not allowed in CORS policy.', 403);
         }
 
@@ -59,6 +64,7 @@ class HandleCors
 
         $response = $next($request);
 
+        MyLog::debug('CORS - FINISH');
         return $response; // Сам добавил, так как мне не нужно добавлять headers для response
 //        return $this->addHeaders($request, $response);
     }
