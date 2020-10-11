@@ -2,12 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\ApiAuthController;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
 use App\ApiUser;
 use Illuminate\Support\Facades\Input;
 use App\Log;
 use App\Title;
+use Illuminate\Support\Facades\Log as MyLog;
 
 class ApiCheckLogEditRegExpPermission
 {
@@ -20,25 +22,27 @@ class ApiCheckLogEditRegExpPermission
      */
     public function handle($request, Closure $next)
     {
+        $user = ApiAuthController::getUserByToken($request->input('access_token'));
 
-        $token = $request->input('access_token');
-        $user = ApiUser::where('access_token', $token)->first();
-        $reg_exp = $user->permission_expression;
 
-        if (Input::has('id')) {
-            $log_id = $request->input('id');
-            $log = Log::find($log_id);
-            $title = Title::find($log->title);
-        } else {
+        try {
             $title =  Title::find($request->input('title'));
+
+            if (is_null($title)) {
+
+                $log = Log::find($request->input('id'));
+                if (is_null($log)) {
+                    return Feedback::getFeedback(106);
+                }
+
+                $title = Title::find($log->title);
+            }
+
+        } catch (\Exception $e) {
+            return Feedback::getFeedback(106);
         }
 
-        $title_name = $title->name;
-        $result = preg_match($reg_exp, $title_name);
-
-//        return $reg_exp. " IN ".$title_name . " = " . $result;
-
-        if ($result != 1) {
+        if (preg_match($user->permission_expression, $title->name) != 1) {
             return Feedback::getFeedback(106);
         }
 

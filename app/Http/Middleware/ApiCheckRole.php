@@ -92,7 +92,9 @@ class ApiCheckRole
             "api/users/delete",
             'api/service/database/backup',
             'api/service/database/update/attachments',
-            'api/logs/clean/files/without/articles'
+            'api/logs/clean/files/without/articles',
+            'api/action/set',
+            'api/action/get'
         ];
 
         $this->permissions = [

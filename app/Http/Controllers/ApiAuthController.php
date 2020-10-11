@@ -98,5 +98,16 @@ class ApiAuthController extends Controller
 
     }
 
+    public static function getUserByToken($token)
+    {
+        $user = ApiUser::where('access_token', $token)->first();
+
+        if (is_null($user)) {
+            $user = ApiUser::where('email', 'guest@mail.com')->first();
+        }
+
+        return $user;
+    }
+
 
 }

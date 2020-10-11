@@ -158,4 +158,20 @@ class UserController extends Controller
         return Feedback::getFeedback(0);
 
     }
+
+    public static function getListOfRoles() {
+
+        $roleList = DB::table('api_users')
+            ->whereNotNull('role')
+            ->groupBy('role')
+            ->select(['role'])
+            ->orderBy('role')
+            ->get();
+
+        $func = function ($item) {
+            return $item->role;
+        };
+
+        return array_map($func, $roleList->toArray());
+    }
 }

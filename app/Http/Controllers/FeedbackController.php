@@ -4,44 +4,6 @@ namespace App\Http\Controllers;
 
 class FeedbackController extends Controller
 {
-    // Action
-//} elseif ($e instanceof \App\Exceptions\Action\Validation\Role) {
-//            return '4.1';
-//        } elseif ($e instanceof \App\Exceptions\Action\Validation\Name) {
-//            return '4.2';
-//        } elseif ($e instanceof \App\Exceptions\Action\Validation\State) {
-//            return '4.3';
-//        } elseif ($e instanceof \App\Exceptions\Action\Validation\Items) {
-//            return '4.4';
-
-// ACTION
-//case '4.1':
-//return {
-//title: "Ошибка валидации действия 4.1",
-//text: "Неверные данные в поле role.",
-//type: "error"
-//}
-//
-//case '4.2':
-//            return {
-//    title: "Ошибка валидации действия 4.2",
-//                text: "Неверные данные в поле name.",
-//                type: "error"
-//            }
-//
-//        case '4.3':
-//            return {
-//    title: "Ошибка валидации действия 4.3",
-//                text: "Неверные данные в поле state.",
-//                type: "error"
-//            }
-//
-//        case '4.4':
-//            return {
-//    title: "Ошибка валидации действия 4.4",
-//                text: "Неверные данные в поле items.",
-//                type: "error"
-//            }
 
     private static $errors = [
         // Authentication
@@ -51,6 +13,9 @@ class FeedbackController extends Controller
         104 => 'Permission denied',
         105 => 'Wrong new password',
         106 => 'Can not pass regular expression middleware',
+
+        // Roles 110-113 see in ExceptionFeedbackController
+
         // Admin
         201 => 'Wrong setting name',
         202 => 'Wrong setting value',

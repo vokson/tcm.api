@@ -2,11 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\ApiAuthController;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
-use App\ApiUser;
-use Illuminate\Support\Facades\Input;
 use App\Log;
+use Illuminate\Support\Facades\Log as MyLog;
 
 class ApiCheckLogEditPermission
 {
@@ -19,25 +19,21 @@ class ApiCheckLogEditPermission
      */
     public function handle($request, Closure $next)
     {
+        $id = $request->input('id', null);
+        if (is_null($id)) {
+            return $next($request);
+        }
 
-        $token = $request->input('access_token');
-        $user = ApiUser::where('access_token', $token)->first();
-        $role = $user->role;
 
-        // Ограничиваем редактирование записей Log для не собственников записей
-        // в случае, если role = engineer
+        $user = ApiAuthController::getUserByToken($request->input('access_token'));
+        $log = Log::find($id);
 
-        if ($role == 'engineer' && Input::has('id')) {
+        if (is_null($log)) {
+            return Feedback::getFeedback(104);
+        }
 
-            $log = Log::find(Input::get('id'));
-
-            if (is_null($log)) {
-                return Feedback::getFeedback(104);
-            }
-
-            if ($log->owner != $user->id) {
-                return Feedback::getFeedback(104);
-            }
+        if (!$user->mayDo('EDIT_NON_OWNED_LOG_RECORD') && ($log->owner != $user->id)) {
+            return Feedback::getFeedback(104);
         }
 
         return $next($request);

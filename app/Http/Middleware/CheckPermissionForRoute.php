@@ -19,9 +19,6 @@ class CheckPermissionForRoute
             $user = ApiUser::where('email', 'guest@mail.com')->first();
         } else {
             $user = ApiUser::where('access_token', $token)->first();
-//            $role = $user->role;
-//            $id = AuthController::currentUsedId($token);
-//            $user = User::find($id);
         }
 
         if (!$user->mayDo($uri)) {
