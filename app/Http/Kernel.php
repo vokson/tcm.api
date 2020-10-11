@@ -14,6 +14,7 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
+        \Fruitcake\Cors\HandleCors::class,
         \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
@@ -39,7 +40,7 @@ class Kernel extends HttpKernel
         'api' => [
 //            'throttle:60,1',
 //            'bindings',
-            'cors',
+
             'route.permission'
         ],
     ];
@@ -63,7 +64,6 @@ class Kernel extends HttpKernel
 
         'auth.api.token' => \App\Http\Middleware\ApiAccessToken::class,
         'auth.api.roles' => \App\Http\Middleware\ApiCheckRole::class,
-        'cors' => \Fruitcake\Cors\HandleCors::class,
         'auth.log.edit' => \App\Http\Middleware\ApiCheckLogEditPermission::class,
         'reg_exp.log.edit' => \App\Http\Middleware\ApiCheckLogEditRegExpPermission::class,
         'auth.log.file.edit' => \App\Http\Middleware\ApiCheckLogFileEditPermission::class,

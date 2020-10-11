@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\ApiUser;
+use App\Http\Controllers\ApiAuthController;
 use App\Http\Controllers\FeedbackController as Feedback;
 use Closure;
 use Illuminate\Support\Facades\Log as MyLog;
@@ -15,14 +16,7 @@ class CheckPermissionForRoute
         MyLog::debug('CheckPermissionForRoute - START');
 
         $uri = str_replace('api/', '', $request->path());
-
-        $token = $request->input('access_token', null);
-
-        if (is_null($token)) {
-            $user = ApiUser::where('email', 'guest@mail.com')->first();
-        } else {
-            $user = ApiUser::where('access_token', $token)->first();
-        }
+        $user = ApiAuthController::getUserByToken($request->input('access_token'));
 
         if (!$user->mayDo($uri)) {
             MyLog::debug('CheckPermissionForRoute - URL is restricted');

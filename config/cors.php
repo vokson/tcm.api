@@ -1,23 +1,13 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Laravel CORS
-    |--------------------------------------------------------------------------
-    |
-    | allowedOrigins, allowedHeaders and allowedMethods can be set to array('*')
-    | to accept any value.
-    |
-    */
     'paths' => ['api/*'],
-    'supportsCredentials' => false,
-    'allowedOrigins' => ['*'],
-    'allowedOriginsPatterns' => [],
-    'allowedHeaders' => ['*'],
-    'allowedMethods' => ['*'],
-    'exposedHeaders' => false,
-    'maxAge' => 0,
+    'supports_credentials' => false,
+    'allowed_origins' => ['*'],
+    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['*'],
+    'allowed_methods' => ['*'],
+    'exposed_headers' => false,
+    'max_age' => 0,
 
 ];

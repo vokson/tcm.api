@@ -70,6 +70,7 @@ use Illuminate\Http\Request;
         // DATABASE
         Route::post('/service/database/backup', 'ServiceController@getDatabaseBackup');
         Route::post('/service/database/update/attachments', 'ServiceController@updateAttachmentStatuses');
+        Route::post('/service/info', 'ServiceController@info');
 
         // STATISTIC
         Route::post('/charts/logs/created/get', 'StatisticController@getItemsForLogChart');
