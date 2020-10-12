@@ -233,7 +233,7 @@ class LogController extends Controller
 
         $items = DB::table('logs')
             ->select(['id', 'is_new', 'what', 'to', 'from', 'title', 'created_at as date'])
-            ->take(Settings::take('COUNT_OF_NEW_LOGS'))
+            ->take(Settings::take('COUNT_OF_ITEMS_IN_NEWS'))
             ->orderBy('id', 'desc')
             ->get();
 
