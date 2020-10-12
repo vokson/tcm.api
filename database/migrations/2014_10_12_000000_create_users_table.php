@@ -20,9 +20,9 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('role');
-            $table->string('access_token');
+            $table->string('access_token')->default('');
             $table->boolean('active')->default(true);
-            $table->string('permission_expression')->default('');
+            $table->string('permission_expression')->default('/SET_REGEXP/');
             $table->timestamps();
         });
     }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\ApiUser;
 
 class UserSeeder extends Seeder
 {
@@ -11,7 +12,7 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $guest = \App\ApiUser();
+        $guest = new ApiUser();
         $guest->name ='guest';
         $guest->surname ='guest';
         $guest->email = 'guest@mail.com';
@@ -20,7 +21,7 @@ class UserSeeder extends Seeder
         $guest->active = 1;
         $guest->save();
 
-        $admin = \App\ApiUser();
+        $admin = new ApiUser();
         $admin->name ='admin';
         $admin->surname ='admin';
         $admin->email = 'admin@mail.com';

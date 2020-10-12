@@ -1,8 +1,7 @@
 <?php
-
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use App\Action;
-use Illuminate\Support\Facades\DB;
 
 class CreateTableActionsByRole extends Migration
 {

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Status;
 
 class StatusSeeder extends Seeder
 {
@@ -11,7 +12,7 @@ class StatusSeeder extends Seeder
      */
     public function run()
     {
-        $transmittal = \App\Status(['TRANSMITTAL']);
+        $transmittal = Status::create(['name' => 'TRANSMITTAL']);
         $transmittal->save();
     }
 }

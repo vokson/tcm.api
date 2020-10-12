@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Setting;
 
 class SettingSeeder extends Seeder
 {
@@ -33,7 +34,7 @@ class SettingSeeder extends Seeder
         ];
 
         foreach ($settings as $key => $value) {
-            $action = new \App\Setting(['name' => $key, 'value' => $value]);
+            $action = Setting::create(['name' => $key, 'value' => $value]);
             $action->save();
         }
     }

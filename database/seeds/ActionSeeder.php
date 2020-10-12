@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Action;
 
 class ActionSeeder extends Seeder
 {
@@ -19,7 +20,18 @@ class ActionSeeder extends Seeder
             'action/get'
         ];
 
+        $guest_urls = [
+            'auth/login',
+            'auth/login/token',
+            'auth/check_token',
+        ];
+
         $urls = [
+            'auth/login',
+            'auth/login/token',
+            'auth/check_token',
+            'action/set',
+            'action/get',
             'auth/change_password',
             "logs/get",
             "logs/set",
@@ -101,9 +113,12 @@ class ActionSeeder extends Seeder
         }
 
         foreach ($admin_urls as $url) {
-            $action = new Action(['name' => $url]);
+            $action = Action::create(['name' => $url, 'role' => 'admin']);
             $action->save();
-            $action = new Action(['name' => $url, 'role' => 'admin']);
+        }
+
+        foreach ($guest_urls as $url) {
+            $action = Action::create(['name' => $url, 'role' => 'guest']);
             $action->save();
         }
     }
