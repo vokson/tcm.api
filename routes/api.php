@@ -28,7 +28,10 @@ use Illuminate\Http\Request;
                 Route::post('/logs/set', 'LogController@set');
             });
 
-            Route::post('/logs/delete', 'LogController@delete');
+            Route::middleware(['log.transmittal.record.delete'])->group(function () {
+                Route::post('/logs/delete', 'LogController@delete');
+            });
+
         });
 
         // LOG FILE

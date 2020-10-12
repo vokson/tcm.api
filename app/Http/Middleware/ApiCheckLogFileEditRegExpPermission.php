@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\ApiAuthController;
 use App\UploadedFile;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
@@ -21,9 +22,7 @@ class ApiCheckLogFileEditRegExpPermission
      */
     public function handle($request, Closure $next)
     {
-        $token = $request->input('access_token');
-        $user = ApiUser::where('access_token', $token)->first();
-        $reg_exp = $user->permission_expression;
+        $user = ApiAuthController::getUserByToken($request->input('access_token'));
 
         if (Input::has('log_id')) { // если загрузка файла
             $log = Log::find(Input::get('log_id'));
@@ -34,10 +33,7 @@ class ApiCheckLogFileEditRegExpPermission
         }
 
         $title = Title::find($log->title);
-        $title_name = $title->name;
-        $result = preg_match($reg_exp, $title_name);
-
-        //        return $reg_exp. " IN ".$title_name . " = " . $result;
+        $result = preg_match($user->permission_expression, $title->name);
 
         if ($result != 1) {
             return Feedback::getFeedback(106);

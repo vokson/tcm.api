@@ -7,7 +7,6 @@ use Asm89\Stack\CorsService;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Support\Facades\Log as MyLog;
 use Symfony\Component\HttpFoundation\Response;
 
 class HandleCors
@@ -33,22 +32,13 @@ class HandleCors
      */
     public function handle($request, Closure $next)
     {
-        MyLog::debug('HandleCors - START');
-        MyLog::debug('HandleCors - METHOD = ' . $request->method());
-
-
-        MyLog::debug($request);
         // Check if we're dealing with CORS and if we should handle it
         if (! $this->shouldRun($request)) {
-            MyLog::debug('HandleCors - NEXT 1');
             return $next($request);
         }
 
-        MyLog::debug('HandleCors - NEXT 2');
-
         // For Preflight, return the Preflight response
         if ($this->cors->isPreflightRequest($request)) {
-            MyLog::debug('HandleCors - NEXT 3');
             $response = $this->cors->handlePreflightRequest($request);
 
             $this->cors->varyHeader($response, 'Access-Control-Request-Method');
@@ -56,28 +46,19 @@ class HandleCors
             return $response;
         }
 
-        MyLog::debug('HandleCors - NEXT 4');
-
         // Add the headers on the Request Handled event as fallback in case of exceptions
         if (class_exists(RequestHandled::class) && $this->container->bound('events')) {
-            MyLog::debug('HandleCors - NEXT 5');
             $this->container->make('events')->listen(RequestHandled::class, function (RequestHandled $event) {
                 $this->addHeaders($event->request, $event->response);
             });
         }
 
-        MyLog::debug('HandleCors - NEXT 6');
-
         // Handle the request
         $response = $next($request);
 
-        MyLog::debug('HandleCors - NEXT 7');
-
         if ($request->getMethod() === 'OPTIONS') {
-            MyLog::debug('HandleCors - NEXT 8');
             $this->cors->varyHeader($response, 'Access-Control-Request-Method');
         }
-        MyLog::debug('HandleCors - NEXT 9');
 
         return $this->addHeaders($request, $response);
     }
@@ -120,21 +101,11 @@ class HandleCors
     {
         // Get the paths from the config or the middleware
         $paths = $this->container['config']->get('cors.paths', []);
-//        MyLog::debug('CONFIG_PATH = ' . __DIR__ . '/../config/cors.php');
-
-
-//        MyLog::debug($paths);
 
         foreach ($paths as $path) {
-//            MyLog::debug($path);
             if ($path !== '/') {
                 $path = trim($path, '/');
             }
-
-//            MyLog::debug(
-//                '$request->fullUrlIs($path) || $request->is($path) = '.
-//                $request->fullUrlIs($path) . ' || ' . $request->is($path)
-//            );
 
             if ($request->fullUrlIs($path) || $request->is($path)) {
                 return true;

@@ -2,14 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\ApiAuthController;
 use App\Http\Controllers\SettingsController;
 use App\Log;
 use App\Title;
 use Closure;
 use App\Http\Controllers\FeedbackController as Feedback;
-use App\ApiUser;
 
-class ApiCheckCountOfLogsForTransmittal
+class ApiCreateFirstRecordForTransmittal
 {
     /**
      * Handle an incoming request.
@@ -31,17 +31,15 @@ class ApiCheckCountOfLogsForTransmittal
 
         // Проверяем создана ли первая запись для трансмиттала
         // если НЕТ, то запрещаем создавать первую запись пользователям
-        // с правами ниже, чем document_controller
+        // при отсутствии прав на это
 
         $reg_exp = SettingsController::take('TRANSMITTAL_REG_EXP');
 
         if (preg_match($reg_exp, $title_name) && is_null(Log::where('title', $title_id)->first())) {
 
-            $token = $request->input('access_token');
-            $user = ApiUser::where('access_token', $token)->first();
-            $role = $user->role;
+            $user = ApiAuthController::getUserByToken($request->input('access_token'));
 
-            if ($role == 'engineer' || $role =='group_leader') {
+            if (!$user->mayDo('ADD_FIRST_RECORD_FOR_TRANSMITTAL')) {
                 return Feedback::getFeedback(309);
             }
         }

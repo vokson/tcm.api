@@ -72,7 +72,8 @@ class Kernel extends HttpKernel
         'auth.checker.file.delete' => \App\Http\Middleware\ApiCheckCheckerFileDeletePermission::class,
         'auth.sender.folder.delete' => \App\Http\Middleware\ApiCheckSenderFolderDeletePermission::class,
         'auth.sender.folder.switch' => \App\Http\Middleware\ApiCheckSenderFolderSwitchPermission::class,
-        'log.transmittal.record.create' => \App\Http\Middleware\ApiCheckCountOfLogsForTransmittal::class,
+        'log.transmittal.record.create' => \App\Http\Middleware\ApiCreateFirstRecordForTransmittal::class,
+        'log.transmittal.record.delete' => \App\Http\Middleware\ApiDeleteFirstRecordForTransmittal::class,
 
         'route.permission' => \App\Http\Middleware\CheckPermissionForRoute::class,
     ];

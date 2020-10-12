@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\ApiAuthController;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
-use App\ApiUser;
 use Illuminate\Support\Facades\Input;
 use App\Check;
 
@@ -21,9 +21,7 @@ class ApiCheckCheckerFileDeletePermission
     {
         // Ограничиваем удаление файлов Checker для не собственников файлов, а также если запись не последняя
 
-        $token = $request->input('access_token');
-        $user = ApiUser::where('access_token', $token)->first();
-
+        $user = ApiAuthController::getUserByToken($request->input('access_token'));
 
         if (!Input::has('id')) {
             return Feedback::getFeedback(701);
@@ -42,12 +40,11 @@ class ApiCheckCheckerFileDeletePermission
         }
 
         // Если user не является собсственником документа
-        // Только admin может удалять не свои документы
-        if (($user->role != 'admin') && ($user->id != $check->owner)) {
-            return Feedback::getFeedback(104);
+        if ($user->mayDo('DELETE_NON_OWNED_CHECK_FILE') || $user->id == $check->owner) {
+           return $next($request);
         }
 
+        return Feedback::getFeedback(104);
 
-        return $next($request);
     }
 }
