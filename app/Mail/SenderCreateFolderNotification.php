@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\ApiUser;
+use App\Http\Controllers\SettingsController as Settings;
 use App\SenderFolder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -34,8 +35,10 @@ class SenderCreateFolderNotification extends Mailable
         $user = ApiUser::find($this->folder->owner);
 
 
+        $subject = Settings::take('SENDER_FOLDER_NOTIFICATION_SUBJECT');
+
         return $this->from('noskov_as@niik.ru')
-            ->subject('АГПЗ. ОТПРАВКА. ' . $this->folder->name)
+            ->subject('ВОЛГАФЕРТ. ОТПРАВКА. ' . $this->folder->name)
             ->view('emails.sender.folder_ready')
             ->with([
                 'folderId' => $this->folder->id,

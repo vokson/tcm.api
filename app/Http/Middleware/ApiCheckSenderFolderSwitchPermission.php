@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\ApiAuthController;
 use Closure;
 use App\Http\Controllers\FeedbackController As Feedback;
-use App\ApiUser;
 
 class ApiCheckSenderFolderSwitchPermission
 {
@@ -18,17 +18,13 @@ class ApiCheckSenderFolderSwitchPermission
     public function handle($request, Closure $next)
     {
 
-        $token = $request->input('access_token');
-        $user = ApiUser::where('access_token', $token)->first();
-        $role = $user->role;
+        $user = ApiAuthController::getUserByToken($request->input('access_token'));
 
-        // Ограничиваем смену статуса Sender Folder
-        // в случае, если role = engineer
-
-        if ($role == 'engineer') {
-            return Feedback::getFeedback(104);
+        // Ограничиваем удаление файлов Sender
+        if ($user->mayDo('SWITCH_STATUS_OF_SENDER_FOLDER')) {
+            return $next($request);
         }
 
-        return $next($request);
+        return Feedback::getFeedback(104);
     }
 }

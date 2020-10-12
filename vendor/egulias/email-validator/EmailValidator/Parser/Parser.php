@@ -18,6 +18,7 @@ use Egulias\EmailValidator\Warning\CFWSWithFWS;
 use Egulias\EmailValidator\Warning\Comment;
 use Egulias\EmailValidator\Warning\QuotedPart;
 use Egulias\EmailValidator\Warning\QuotedString;
+use Illuminate\Support\Facades\Log as MyLog;
 
 abstract class Parser
 {
@@ -142,7 +143,11 @@ abstract class Parser
 
     protected function escaped()
     {
+//        MyLog::debug('lexer = ' .  $this->lexer);
+
         $previous = $this->lexer->getPrevious();
+
+//        MyLog::debug('previous = ' .  $previous);
 
         if ($previous['type'] === EmailLexer::S_BACKSLASH
             &&
