@@ -6,7 +6,6 @@ Route::post('/auth/login', 'ApiAuthController@login');
 Route::post('/auth/login/token', 'ApiAuthController@loginByToken');
 Route::post('/auth/check_token', 'ApiAuthController@isTokenValid');
 
-//    Route::middleware(['auth.api.token', 'auth.api.roles'])->group(function () {
 Route::middleware(['auth.api.token'])->group(function () {
 
     Route::post('/auth/change_password', 'UserController@changePassword');
