@@ -15,7 +15,6 @@ class CreateUploadFileTable extends Migration
     {
         Schema::create('uploaded_files', function (Blueprint $table) {
             $table->increments('id');
-//            $table->integer('log')->references('id')->on('logs')->onDelete('restrict');
             $table->integer('log');
             $table->integer('size');
             $table->string('original_name');

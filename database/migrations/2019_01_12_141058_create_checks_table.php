@@ -23,8 +23,10 @@ class CreateChecksTable extends Migration
             $table->integer('status');
             $table->integer('mistake_count');
             $table->integer('owner')
-                ->default(SettingsController::take('SYSTEM_USER_ID'))
                 ->references('id')->on('api_users')->onDelete('restrict');
+
+            $table->string('extension')->default('');
+
             $table->timestamps();
         });
     }

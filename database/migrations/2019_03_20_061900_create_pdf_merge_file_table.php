@@ -18,7 +18,6 @@ class CreatePdfMergeFileTable extends Migration
             $table->increments('id');
 
             $table->integer('owner')
-                ->default(SettingsController::take('SYSTEM_USER_ID'))
                 ->references('id')->on('api_users')->onDelete('restrict');
 
             $table->integer('drop_id');
@@ -28,6 +27,9 @@ class CreatePdfMergeFileTable extends Migration
             $table->integer('size');
             $table->string('server_name');
             $table->string('uin');
+
+            $table->boolean('is_name')->default(false);
+
             $table->timestamps();
         });
     }

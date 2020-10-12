@@ -18,6 +18,8 @@ class CreateTitlesTable extends Migration
             $table->string('name')->unique();
             $table->string('status')->references('id')->on('statuses')->onDelete('restrict');
             $table->string('predecessor')->nullable();
+            $table->string('description')->nullable();
+            $table->string('volume')->nullable();
             $table->timestamps();
         });
     }

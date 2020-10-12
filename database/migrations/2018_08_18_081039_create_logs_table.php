@@ -19,6 +19,13 @@ class CreateLogsTable extends Migration
             $table->integer('to')->references('id')->on('api_users')->onDelete('restrict');
             $table->string('title')->references('name')->on('titles')->onDelete('restrict');
             $table->string('what');
+
+            $table->integer('owner')
+                ->references('id')->on('api_users')->onDelete('restrict');
+
+            $table->boolean('is_new')->default(false);
+            $table->boolean('is_attachment_exist')->default(false);
+
             $table->timestamps();
         });
     }

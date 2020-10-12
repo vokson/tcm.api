@@ -14,7 +14,7 @@ class SettingSeeder extends Seeder
         $settings = [
             'TOKEN_LIFE_TIME' => '43200',
             'DEFAULT_PASSWORD' => '1234',
-            'SYSTEM_USER_ID' => \App\ApiUser::where('email', 'guest@mail.com')->first()->id, //59
+//            'SYSTEM_USER_ID' => \App\ApiUser::where('email', 'guest@mail.com')->first()->id, //59
             'COUNT_OF_ITEMS_IN_NEWS' => '20',
             'ARCHIVE_STORAGE_TIME' => '1800',
             'ARCHIVE_CREATION_TIME' => '300',

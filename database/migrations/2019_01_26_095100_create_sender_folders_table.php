@@ -18,8 +18,9 @@ class CreateSenderFoldersTable extends Migration
             $table->increments('id');
             $table->string('name')->default('');
             $table->integer('owner')
-                ->default(SettingsController::take('SYSTEM_USER_ID'))
                 ->references('id')->on('api_users')->onDelete('restrict');
+
+            $table->boolean('is_ready')->default(false);
             $table->timestamps();
         });
     }

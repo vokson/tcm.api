@@ -17,7 +17,6 @@ class CreateUserSettingsTable extends Migration
         Schema::create('user_settings', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner')
-                ->default(SettingsController::take('SYSTEM_USER_ID'))
                 ->references('id')->on('api_users')->onDelete('restrict');
             $table->string('name');
             $table->string('value');
