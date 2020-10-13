@@ -64,7 +64,6 @@ return array(
     'App\\Http\\Middleware\\ApiCheckLogFileEditPermission' => $baseDir . '/app/Http/Middleware/ApiCheckLogFileEditPermission.php',
     'App\\Http\\Middleware\\ApiCheckLogFileEditRegExpPermission' => $baseDir . '/app/Http/Middleware/ApiCheckLogFileEditRegExpPermission.php',
     'App\\Http\\Middleware\\ApiCheckLogMarkNewMessagePermission' => $baseDir . '/app/Http/Middleware/ApiCheckLogMarkNewMessagePermission.php',
-    'App\\Http\\Middleware\\ApiCheckRole' => $baseDir . '/app/Http/Middleware/ApiCheckRole.php',
     'App\\Http\\Middleware\\ApiCheckSenderFolderDeletePermission' => $baseDir . '/app/Http/Middleware/ApiCheckSenderFolderDeletePermission.php',
     'App\\Http\\Middleware\\ApiCheckSenderFolderSwitchPermission' => $baseDir . '/app/Http/Middleware/ApiCheckSenderFolderSwitchPermission.php',
     'App\\Http\\Middleware\\ApiCreateFirstRecordForTransmittal' => $baseDir . '/app/Http/Middleware/ApiCreateFirstRecordForTransmittal.php',

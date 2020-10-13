@@ -450,7 +450,6 @@ class ComposerStaticInit7adfac264e0edefe18a050f416b0578d
         'App\\Http\\Middleware\\ApiCheckLogFileEditPermission' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiCheckLogFileEditPermission.php',
         'App\\Http\\Middleware\\ApiCheckLogFileEditRegExpPermission' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiCheckLogFileEditRegExpPermission.php',
         'App\\Http\\Middleware\\ApiCheckLogMarkNewMessagePermission' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiCheckLogMarkNewMessagePermission.php',
-        'App\\Http\\Middleware\\ApiCheckRole' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiCheckRole.php',
         'App\\Http\\Middleware\\ApiCheckSenderFolderDeletePermission' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiCheckSenderFolderDeletePermission.php',
         'App\\Http\\Middleware\\ApiCheckSenderFolderSwitchPermission' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiCheckSenderFolderSwitchPermission.php',
         'App\\Http\\Middleware\\ApiCreateFirstRecordForTransmittal' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiCreateFirstRecordForTransmittal.php',
