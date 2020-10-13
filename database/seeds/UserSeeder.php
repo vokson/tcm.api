@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
         $admin->password = hash('sha256', '1234');
         $admin->role = 'admin';
         $admin->active = 1;
-        $guest->access_token = '';
+        $admin->access_token = '';
         $admin->save();
     }
 }
