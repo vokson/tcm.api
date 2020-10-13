@@ -96,7 +96,6 @@ class ActionSeeder extends Seeder
             "users/set/default/password",
             "users/delete",
             'service/database/backup',
-            'service/database/update/attachments',
             'logs/clean/files/without/articles',
             'ADD_FIRST_RECORD_FOR_TRANSMITTAL',
             'DELETE_FIRST_RECORD_FOR_TRANSMITTAL',
