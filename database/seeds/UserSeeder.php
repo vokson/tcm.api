@@ -19,6 +19,7 @@ class UserSeeder extends Seeder
         $guest->password = hash('sha256', '1234');
         $guest->role = 'guest';
         $guest->active = 1;
+        $guest->access_token = '';
         $guest->save();
 
         $admin = new ApiUser();
@@ -28,6 +29,7 @@ class UserSeeder extends Seeder
         $admin->password = hash('sha256', '1234');
         $admin->role = 'admin';
         $admin->active = 1;
+        $guest->access_token = '';
         $admin->save();
     }
 }
