@@ -75,8 +75,8 @@ Route::middleware(['auth.api.token'])->group(function () {
     Route::post('/charts/titles/created/get', 'StatisticController@getItemsForTitleChart');
     Route::post('/charts/titles/status/get', 'StatisticController@getItemsForTitleStatusChart');
     Route::post('/charts/tq/status/get', 'StatisticController@getItemsForTqStatus');
-    Route::post('charts/storage/get', 'StatisticController@getItemsForStorageChart');
-    Route::post('charts/checked/drawings/get', 'StatisticController@getItemsForCheckedDrawingsChart');
+    Route::post('/charts/storage/get', 'StatisticController@getItemsForStorageChart');
+    Route::post('/charts/checked/drawings/get', 'StatisticController@getItemsForCheckedDrawingsChart');
 
     // CHECK FILES
     Route::post('/checker/file/upload', 'CheckedFileController@upload');
@@ -92,14 +92,9 @@ Route::middleware(['auth.api.token'])->group(function () {
     // SENDER
     Route::post('/sender/folder/add', 'SenderFolderController@add');
     Route::post('/sender/folder/get', 'SenderFolderController@get');
-    Route::middleware(['auth.sender.folder.delete'])->group(function () {
-        Route::post('/sender/folder/delete', 'SenderFolderController@delete');
-    });
+    Route::post('/sender/folder/delete', 'SenderFolderController@delete');
     Route::post('/sender/folder/count', 'SenderFolderController@count');
-
-    Route::middleware(['auth.sender.folder.switch'])->group(function () {
-        Route::post('/sender/folder/switch/ready', 'SenderFolderController@switch');
-    });
+    Route::post('/sender/folder/switch/ready', 'SenderFolderController@switch');
 
     // SENDER FILES
     Route::post('/sender/file/upload', 'SenderFileController@upload');

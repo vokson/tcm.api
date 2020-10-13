@@ -101,10 +101,8 @@ class ActionSeeder extends Seeder
             'ADD_FIRST_RECORD_FOR_TRANSMITTAL',
             'DELETE_FIRST_RECORD_FOR_TRANSMITTAL',
             'DELETE_NON_OWNED_CHECK_FILE',
-            'DELETE_SENDER_FOLDER',
             'EDIT_NON_OWNED_LOG_RECORD',
             'EDIT_NON_OWNED_LOG_RECORD_FILE',
-            'SWITCH_STATUS_OF_SENDER_FOLDER'
         ];
 
         foreach ($urls as $url) {

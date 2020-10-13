@@ -70,8 +70,6 @@ class Kernel extends HttpKernel
         'reg_exp.log.file.edit' => \App\Http\Middleware\ApiCheckLogFileEditRegExpPermission::class,
         'auth.log.new.message' => \App\Http\Middleware\ApiCheckLogMarkNewMessagePermission::class,
         'auth.checker.file.delete' => \App\Http\Middleware\ApiCheckCheckerFileDeletePermission::class,
-        'auth.sender.folder.delete' => \App\Http\Middleware\ApiCheckSenderFolderDeletePermission::class,
-        'auth.sender.folder.switch' => \App\Http\Middleware\ApiCheckSenderFolderSwitchPermission::class,
         'log.transmittal.record.create' => \App\Http\Middleware\ApiCreateFirstRecordForTransmittal::class,
         'log.transmittal.record.delete' => \App\Http\Middleware\ApiDeleteFirstRecordForTransmittal::class,
 
