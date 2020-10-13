@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\Setting;
+use App\Status;
 
 class SettingSeeder extends Seeder
 {
@@ -15,7 +16,6 @@ class SettingSeeder extends Seeder
         $settings = [
             'TOKEN_LIFE_TIME' => '43200',
             'DEFAULT_PASSWORD' => '1234',
-//            'SYSTEM_USER_ID' => \App\ApiUser::where('email', 'guest@mail.com')->first()->id, //59
             'COUNT_OF_ITEMS_IN_NEWS' => '20',
             'ARCHIVE_STORAGE_TIME' => '1800',
             'ARCHIVE_CREATION_TIME' => '300',
@@ -29,8 +29,12 @@ class SettingSeeder extends Seeder
             'DOCS_REG_EXP_FOR_LIST_FILE' => '/.+\.json$/',
             'TRANSMITTAL_REG_EXP' => '/^(4022-CM-RH-T-|4022-RH-CM-T-)\d{3}[1-9]{1}$/',
             'DOCS_REG_EXP_FOR_PDF_FILE' => '/.*(pdf|PDF)$/',
-            'STATUS_ID_FOR_NEW_TRANSMITTAL' => \App\Status::where('name', 'TRANSMITTAL')->first()->id, //12
-            'SENDER_FOLDER_NOTIFICATION_SUBJECT' => 'ВОЛГАФЕРТ. ОТПРАВКА.'
+            'STATUS_ID_FOR_NEW_TRANSMITTAL' => Status::where('name', 'TRANSMITTAL')->first()->id,
+            'SENDER_FOLDER_NOTIFICATION_SUBJECT' => 'ВОЛГАФЕРТ. ОТПРАВКА.',
+            'FRONTEND_CODE_1_NAME_RU' => 'КОД ДОКУМЕНТА 1',
+            'FRONTEND_CODE_1_NAME_EN' => 'DOC CODE 1',
+            'FRONTEND_CODE_2_NAME_RU' => 'КОД ДОКУМЕНТА 2',
+            'FRONTEND_CODE_2_NAME_EN' => 'DOC CODE 2',
         ];
 
         foreach ($settings as $key => $value) {
