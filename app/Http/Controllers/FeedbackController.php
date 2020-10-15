@@ -79,7 +79,7 @@ class FeedbackController extends Controller
         1007 => 'Eng title is missed',
         1008 => 'ID is missed',
         1009 => 'Code 1 is empty',
-        1010 => 'Revision is empty',
+        1010 => 'Wrong revision',
         1011 => 'Wrong ID',
         1012 => 'Doc can not be added',
         1013 => 'Doc can not be deleted',

@@ -41,7 +41,8 @@ class SettingSeeder extends Seeder
             // Двойное экранирование, так как это уже JS регулярное выражение
             'FRONTEND_DOCS_CODE_1_JS_REG_EXP' => '^4022-[A-Z]{2}-[A-Z]{2}-(00000|66210|66220|66230|66321|66340|66341|66422|66450|66560|66570|66580|66690)(\\d{4}|\\d{2}-\\d{3}|\\d{1}-\\d{3}(\\s[A-Z]\\d?)?)(_C_RH_(OP|CL))?$',
             'FRONTEND_DOCS_CODE_2_JS_REG_EXP' => '^7500081106-(00000|66210|66220|66230|66321|66340|66341|66422|66450|66560|66570|66580|66690)-(КМ|КЖ|АР|ЭГ|НВК|НВК|ОВ)\\d{0,2}(\\.(РР|ТИ|ТЗ))?-\\d{4}$',
-            'FRONTEND_DOCS_REV_JS_REG_EXP' => '^\\d{1}[A-Z0-9]{1}$',
+//            'FRONTEND_DOCS_REV_JS_REG_EXP' => '^\\d{1}[A-Z0-9]{1}$',
+            'DOCS_REV_LIST' => '0A|0B|0C|0D|0E|0F|00|1A|1B|1C|1D|1E|1F|01|2A|2B|2C|2D|2E|2F',
             'FRONTEND_DOCS_CLASS_JS_REG_EXP' => '^(A|C|I|RQ|FI|IFC)$',
             'FRONTEND_RECORDS_ADD_WORDS_TO_TEXT_IN_JSON' => '["Здесь должны","быть слова","которые можно добавить"]',
             'FRONTEND_TITLES_FIELD_1_NAME_RU' => 'Предшественник',

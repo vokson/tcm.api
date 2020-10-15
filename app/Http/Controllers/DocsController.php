@@ -4,20 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Doc;
 use App\Log;
-use App\Status;
 use App\Title;
 use App\UploadedFile;
-use Hamcrest\Core\Set;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController as Feedback;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\DB;
 use DateTime;
 use Exception;
 use Carbon\Carbon;
+
 
 class DocsController extends Controller
 {
@@ -149,7 +146,6 @@ class DocsController extends Controller
     {
 
         $transmittal_name = trim(Input::get('transmittal', ''));
-
         $transmittal = Title::where('name', $transmittal_name)->first();
 
         if (is_null($transmittal)) {
@@ -168,7 +164,6 @@ class DocsController extends Controller
     {
 
         $transmittal_name = trim(Input::get('transmittal', ''));
-
         $transmittal = Title::where('name', $transmittal_name)->first();
 
         if (is_null($transmittal)) {
@@ -226,7 +221,8 @@ class DocsController extends Controller
             if (!array_key_exists('revision', $item)) {
                 return Feedback::getFeedback(1004);
             }
-            if ($item['revision'] == '') {
+
+            if (!$this->isRevisionCorrect($item['revision'])) {
                 return Feedback::getFeedback(1010);
             }
 
@@ -251,6 +247,7 @@ class DocsController extends Controller
             $doc->code_1 = $item['code_1'];
             $doc->code_2 = $item['code_2'];
             $doc->revision = $item['revision'];
+            $doc->revision_priority = $this->getRevisionPriorityIndex($item['revision']);
             $doc->class = $item['class'];
             $doc->title_en = $item['title_en'];
             $doc->title_ru = $item['title_ru'];
@@ -261,6 +258,29 @@ class DocsController extends Controller
 
         return Feedback::getFeedback(0);
 
+    }
+
+    private function listOfCorrectRevisions()
+    {
+        $s = SettingsController::take('DOCS_REV_LIST');
+
+        try {
+            $list = explode('|', $s);
+        } catch (\Exception $e) {
+            $list = [];
+        }
+
+        return $list;
+    }
+
+    private function isRevisionCorrect($rev)
+    {
+        return in_array($rev, $this->listOfCorrectRevisions(), true);
+    }
+
+    private function getRevisionPriorityIndex($rev)
+    {
+        return array_search($rev, $this->listOfCorrectRevisions(), true);
     }
 
     public function deleteDocumentFromTransmittal(Request $request)
