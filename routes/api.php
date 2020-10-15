@@ -125,7 +125,9 @@ Route::middleware(['auth.api.token'])->group(function () {
     Route::post('/docs/edit/add', 'DocsController@addNewDocumentToTransmittal');
     Route::post('/docs/edit/delete', 'DocsController@deleteDocumentFromTransmittal');
     Route::post('/docs/edit/file/upload', 'DocsController@upload');
+    Route::post('/docs/update/priority/indexes', 'DocsController@updatePriorityIndexes');
     Route::post('/docs/search/get', 'DocsController@search');
+
 
     // COUNT
     Route::post('/counts', 'CountController@get');

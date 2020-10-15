@@ -54,7 +54,7 @@ class DocsController extends Controller
             ->groupBy('title');
 
         $maxRevs = DB::table('docs')
-            ->select(DB::raw('MAX(revision),  id'))
+            ->select(DB::raw('MAX(revision_priority),  id'))
             ->groupBy('code_1');
 
         $query = DB::table('docs');
@@ -247,10 +247,15 @@ class DocsController extends Controller
             $doc->code_1 = $item['code_1'];
             $doc->code_2 = $item['code_2'];
             $doc->revision = $item['revision'];
-            $doc->revision_priority = $this->getRevisionPriorityIndex($item['revision']);
+
             $doc->class = $item['class'];
             $doc->title_en = $item['title_en'];
             $doc->title_ru = $item['title_ru'];
+
+            $priority_index = $this->getRevisionPriorityIndex($item['revision']);
+            if ($priority_index !== false) {
+                $doc->revision_priority = $priority_index;
+            }
 
             $doc->save();
 
@@ -417,6 +422,33 @@ class DocsController extends Controller
         $bom = pack('H*', 'EFBBBF');
         $text = preg_replace("/^$bom/", '', $text);
         return $text;
+    }
+
+    public function updatePriorityIndexes(Request $request)
+    {
+        for ($i=0; $i < count($this->listOfCorrectRevisions()); $i++ ) {
+            Doc::where('revision', $this->listOfCorrectRevisions()[$i])->update(['revision_priority' => $i]);
+        }
+
+//        $docs = Doc::all();
+//        foreach ($docs as $doc) {
+//            if ($doc->revision == '') {
+//                $doc->revision = '-';
+//            }
+//
+//            $index = $this->getRevisionPriorityIndex($doc->revision);
+//
+//            if ($index === false) {
+//                return Feedback::getFeedback(1010, [
+//                    'revision' => $doc->revision
+//                ]);
+//            }
+//
+//            $doc->revision_priority = $index;
+//            $doc->save();
+//        }
+
+        return Feedback::getFeedback(0);
     }
 
 }

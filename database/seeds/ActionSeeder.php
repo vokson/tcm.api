@@ -87,6 +87,7 @@ class ActionSeeder extends Seeder
             "docs/edit/add",
             "docs/edit/delete",
             "docs/edit/file/upload",
+            'docs/update/priority/indexes',
             "settings/get",
             "settings/set",
             "statuses/set",
