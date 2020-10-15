@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use DateTime;
 use Exception;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log as MyLog;
 
 
 class DocsController extends Controller
@@ -78,6 +79,7 @@ class DocsController extends Controller
             'docs.code_1',
             'docs.code_2',
             'docs.revision',
+            'docs.revision_priority',
             'docs.class',
             'docs.transmittal as transmittal_id',
             'docs.title_en',
@@ -86,6 +88,18 @@ class DocsController extends Controller
             'firstLogs.date as date',
             'firstLogs.id as log_id'
         );
+
+        // VUE
+        // item.id, item.date, item.transmittal, item.code_1, item.code_2,
+        // item.revision, item.class, item.title_en, item.title_ru
+        // item.primaryPdfFileId
+        // item.files -> file.id, file.name
+
+        //SELECT docs.id, docs.code_1, docs.code_2, docs.revision, docs.class, docs.title_en, docs.title_ru, titles.name FROM docs
+        //LEFT JOIN titles ON titles.id = docs.transmittal WHERE docs.code_2 like "%66340-КМ1%"  ORDER BY code_2
+
+        //SELECT docs.id, docs.code_1, docs.code_2, docs.revision, MAX(docs.revision_priority), docs.class, docs.title_en, docs.title_ru, titles.name FROM docs
+        //LEFT JOIN titles ON titles.id = docs.transmittal  GROUP BY code_1 ORDER BY code_2
 
         foreach ($parameters as $key => $value) {
             if ($value != '') {
@@ -99,11 +113,13 @@ class DocsController extends Controller
 
         $query->whereBetween('firstLogs.date', [$dayStartDate, $dayEndDate]);
 
-//        DB::enableQueryLog();
+        DB::connection()->enableQueryLog();
 
-        $query->orderBy('code_1', 'revision');
+        $query->orderBy('code_1', 'revision_priority');
 
         $docs = $query->get();
+
+        MyLog::debug(DB::getQueryLog());
 
         // Ищем файлы
 
