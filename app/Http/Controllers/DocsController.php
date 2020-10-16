@@ -51,7 +51,7 @@ class DocsController extends Controller
 
 
         $firstLogs = DB::table('logs')
-            ->select(DB::raw('MIN(created_at) as date, title, id'))
+            ->select(DB::raw('MIN(id) as id, title'))
             ->groupBy('title');
 
         $maxRevs = DB::table('docs')
@@ -70,9 +70,7 @@ class DocsController extends Controller
             $join->on('docs.transmittal', '=', 'firstLogs.title');
         });
 
-        $query->join('titles', function ($join) {
-            $join->on('docs.transmittal', '=', 'titles.id');
-        });
+
 
         $query->select(
             'docs.id',
@@ -81,13 +79,18 @@ class DocsController extends Controller
             'docs.revision',
             'docs.revision_priority',
             'docs.class',
-            'docs.transmittal as transmittal_id',
             'docs.title_en',
             'docs.title_ru',
+            'titles.id as transmittal_id',
             'titles.name as transmittal',
-            'firstLogs.date as date',
+            'titles.created_at as date',
             'firstLogs.id as log_id'
         );
+
+        $query->join('titles', function ($join) {
+            $join->on('docs.transmittal', '=', 'titles.id');
+        });
+
 
         // VUE
         // item.id, item.date, item.transmittal, item.code_1, item.code_2,
@@ -103,15 +106,15 @@ class DocsController extends Controller
 
         foreach ($parameters as $key => $value) {
             if ($value != '') {
-                $query->where($key, 'like', '%' . $value . '%');
+                $query->where('docs.' . $key, 'like', '%' . $value . '%');
             }
         }
 
         if ($transmittalName != '') {
-            $query->where('titles.name', 'like', '%' . $transmittalName . '%');
+            $query->where('transmittal', 'like', '%' . $transmittalName . '%');
         }
 
-        $query->whereBetween('firstLogs.date', [$dayStartDate, $dayEndDate]);
+        $query->whereBetween('date', [$dayStartDate, $dayEndDate]);
 
         DB::connection()->enableQueryLog();
 
@@ -119,9 +122,12 @@ class DocsController extends Controller
 
         $docs = $query->get();
 
-        MyLog::debug(DB::getQueryLog());
-
         // Ищем файлы
+
+        $regexForPdfFile = SettingsController::take('DOCS_REG_EXP_FOR_PDF_FILE');
+
+        MyLog::debug(DB::getQueryLog());
+        MyLog::debug('Count of docs = ' . count($docs));
 
         foreach ($docs as $doc) {
 
@@ -138,19 +144,24 @@ class DocsController extends Controller
                 ->orderBy('original_name')
                 ->get();
 
+            MyLog::debug('Count of files for log_id('.$doc->log_id.') and original_name('.$cleanedCode_1.') = ' . count($files));
+
             $doc->files = [];
             $doc->primaryPdfFileId = null;
 
             foreach ($files as $file) {
                 if (
                     is_null($doc->primaryPdfFileId) &&
-                    preg_match(SettingsController::take('DOCS_REG_EXP_FOR_PDF_FILE'), $file->original_name)
+                    preg_match($regexForPdfFile, $file->original_name)
                 ) {
                     $doc->primaryPdfFileId = $file->id;
                 }
                 $doc->files[] = ['name' => $file->original_name, 'id' => $file->id];
             }
+
         }
+
+
 
         return Feedback::getFeedback(0, [
             'items' => $docs->toArray(),
@@ -442,7 +453,7 @@ class DocsController extends Controller
 
     public function updatePriorityIndexes(Request $request)
     {
-        for ($i=0; $i < count($this->listOfCorrectRevisions()); $i++ ) {
+        for ($i = 0; $i < count($this->listOfCorrectRevisions()); $i++) {
             Doc::where('revision', $this->listOfCorrectRevisions()[$i])->update(['revision_priority' => $i]);
         }
 
