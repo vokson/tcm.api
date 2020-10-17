@@ -111,7 +111,7 @@ class DocsController extends Controller
         }
 
         if ($transmittalName != '') {
-            $query->where('transmittal', 'like', '%' . $transmittalName . '%');
+            $query->where('titles.name', 'like', '%' . $transmittalName . '%');
         }
 
         $query->whereBetween('date', [$dayStartDate, $dayEndDate]);
