@@ -40,7 +40,10 @@ class DatabaseBackup extends Command
     public function handle()
     {
         $filename = Carbon::now()->toDateTimeString() . ".sqlite";
-        $path = storage_path('app/database_backup/VLG.API/' . $filename);
+        $filename = str_replace(' ', '_', $filename);
+        $filename = str_replace(':', '_', $filename);
+
+        $path = config('filesystems.databaseBackupPath') . DIRECTORY_SEPARATOR .  $filename;
 
         File::copy(database_path('database.sqlite'), $path);
     }

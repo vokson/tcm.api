@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log as MyLog;
 
 class CleanDatabaseBackup extends Command
 {
@@ -30,8 +31,8 @@ class CleanDatabaseBackup extends Command
         parent::__construct();
     }
 
-    const LIFE_TIME = 14*24*60*60; // 2 weeks
-    const LOG_FILENAME = 'error_log.txt';
+//    const LIFE_TIME = 14*24*60*60; // 2 weeks
+//    const LOG_FILENAME = 'error_log.txt';
 
     /**
      * Execute the console command.
@@ -40,13 +41,13 @@ class CleanDatabaseBackup extends Command
      */
     public function handle()
     {
-        $directory = storage_path('app/database_backup/VLG.API/');
+        $directory = config('filesystems.databaseBackupPath');
         $scanned_directory = array_diff(scandir($directory), array('..', '.'));
 
         foreach ($scanned_directory as $filename) {
             $path = $directory . '/' . $filename;
 
-            if (file_exists($path) && (time() - filemtime($path) > self::LIFE_TIME)) {
+            if (file_exists($path) && (time() - filemtime($path) > intval(config('database.backup_lifetime')) )) {
 
 //            echo "path";
 //            echo time();
@@ -56,11 +57,12 @@ class CleanDatabaseBackup extends Command
                     unlink($path);
 
                 } catch (Exception $e) {
-                    file_put_contents(
-                        $directory . '/' . self::LOG_FILENAME,
-                        date("Y-m-d H:i:s") . ' - ' . $e->getMessage(),
-                        FILE_APPEND
-                    );
+                    MyLog::error($e->getMessage());
+//                    file_put_contents(
+//                        $directory . '/' . self::LOG_FILENAME,
+//                        date("Y-m-d H:i:s") . ' - ' . $e->getMessage(),
+//                        FILE_APPEND
+//                    );
                 }
 
             }

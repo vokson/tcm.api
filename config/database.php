@@ -12,7 +12,7 @@ return [
     | you may use many connections at once using the Database library.
     |
     */
-
+    'backup_lifetime' =>env('DB_BACKUP_LIFETIME',  14*24*60*60), // 2 weeks
     'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
