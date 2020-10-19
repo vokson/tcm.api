@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log as MyLog;
 
 
 class SenderFolderController extends Controller
@@ -50,6 +51,7 @@ class SenderFolderController extends Controller
 
         foreach ($files as $file) {
             if ((Storage::delete($file->server_name) === false) || ($file->delete() === false)) {
+                MyLog::error('File '. $file->server_name . 'in folder with id=' . $folder_id . ' can not be deleted');
                 return Feedback::getFeedback(603);
             }
         }

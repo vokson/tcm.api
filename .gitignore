@@ -13,3 +13,4 @@ yarn-error.log
 .env
 *.sqlite
 worker.log
+.idea
