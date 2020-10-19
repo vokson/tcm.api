@@ -7,6 +7,7 @@ use App\SenderFolder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\FeedbackController As Feedback;
+use Illuminate\Support\Facades\Log as MyLog;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Check;
@@ -139,8 +140,9 @@ class SenderFileController extends Controller
             try {
                 Storage::delete($file->server_name);
 
-            } catch (QueryException $e) {
-
+            } catch (\Exception $e) {
+                MyLog::error('File '. $file->server_name . ' can not be deleted');
+                MyLog::error($e->getMessage());
                 return Feedback::getFeedback(603);
             }
         }
