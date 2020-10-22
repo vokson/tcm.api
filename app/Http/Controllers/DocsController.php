@@ -56,7 +56,10 @@ class DocsController extends Controller
 
         $maxRevs = DB::table('docs')
             ->select(DB::raw('MAX(revision_priority),  id'))
-            ->groupBy('code_1');
+            ->groupBy('code_1', 'code_2');
+        // code_2 добавлено, так как code_2 иногда отсутствует, но id берется от него
+        // если есть where по code_2, тогда данный документ отсутствует в выдаче по последним ревизиям,
+        // что неправильно
 
         $query = DB::table('docs');
 
