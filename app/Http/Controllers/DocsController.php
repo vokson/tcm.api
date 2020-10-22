@@ -129,8 +129,8 @@ class DocsController extends Controller
 
         $regexForPdfFile = SettingsController::take('DOCS_REG_EXP_FOR_PDF_FILE');
 
-        MyLog::debug(DB::getQueryLog());
-        MyLog::debug('Count of docs = ' . count($docs));
+//        MyLog::debug(DB::getQueryLog());
+//        MyLog::debug('Count of docs = ' . count($docs));
 
         foreach ($docs as $doc) {
 
@@ -147,7 +147,7 @@ class DocsController extends Controller
                 ->orderBy('original_name')
                 ->get();
 
-            MyLog::debug('Count of files for log_id('.$doc->log_id.') and original_name('.$cleanedCode_1.') = ' . count($files));
+//            MyLog::debug('Count of files for log_id('.$doc->log_id.') and original_name('.$cleanedCode_1.') = ' . count($files));
 
             $doc->files = [];
             $doc->primaryPdfFileId = null;
